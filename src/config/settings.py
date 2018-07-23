@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # third party
+    "rest_framework",
     # first party
     "blog.apps.BlogConfig",
     "organizer.apps.OrganizerConfig",
