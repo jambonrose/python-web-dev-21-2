@@ -1,0 +1,7 @@
+[flake8]
+exclude=settings.py, wsgi.py, manage.py, */migrations/*
+ignore = B950, D104, D105, D106, D400, E203, E266, E501, N803, N806, W503
+max-complexity = 10
+max-line-length = 60
+select = B, B9, C, D, E, F, N, W
+ignore-names = setUp, tearDown, setUpClass, tearDownClass, setUpTestData
