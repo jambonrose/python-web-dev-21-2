@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/2.1/ref/models/fields/
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#charfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#datefield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#emailfield
+https://docs.djangoproject.com/en/2.1/ref/models/fields/#foreignkey
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#slugfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#textfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#urlfield
@@ -40,3 +41,6 @@ class NewsLink(models.Model):
     slug = models.SlugField()
     pub_date = models.DateField()
     link = models.URLField()
+    startup = models.ForeignKey(
+        Startup, on_delete=models.CASCADE
+    )
