@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/2.1/ref/models/fields/#charfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#datefield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#emailfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#foreignkey
+https://docs.djangoproject.com/en/2.1/ref/models/fields/#manytomanyfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#slugfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#textfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#urlfield
@@ -32,6 +33,7 @@ class Startup(models.Model):
     founded_date = models.DateField()
     contact = models.EmailField()
     website = models.URLField()
+    tags = models.ManyToManyField(Tag)
 
 
 class NewsLink(models.Model):
