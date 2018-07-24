@@ -16,14 +16,25 @@ https://docs.djangoproject.com/en/2.1/ref/models/fields/#textfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#urlfield
 
 """
-from django.db import models
+from django.db.models import (
+    CASCADE,
+    CharField,
+    DateField,
+    EmailField,
+    ForeignKey,
+    ManyToManyField,
+    Model,
+    SlugField,
+    TextField,
+    URLField,
+)
 
 
-class Tag(models.Model):
+class Tag(Model):
     """Labels to help categorize data"""
 
-    name = models.CharField(max_length=31, unique=True)
-    slug = models.SlugField(
+    name = CharField(max_length=31, unique=True)
+    slug = SlugField(
         max_length=31,
         unique=True,
         help_text="A label for URL config.",
@@ -36,22 +47,22 @@ class Tag(models.Model):
         return self.name
 
 
-class Startup(models.Model):
+class Startup(Model):
     """Data about a Startup company"""
 
-    name = models.CharField(max_length=31, db_index=True)
-    slug = models.SlugField(
+    name = CharField(max_length=31, db_index=True)
+    slug = SlugField(
         max_length=31,
         unique=True,
         help_text="A label for URL config.",
     )
-    description = models.TextField()
-    founded_date = models.DateField("date founded")
-    contact = models.EmailField()
-    website = models.URLField(
+    description = TextField()
+    founded_date = DateField("date founded")
+    contact = EmailField()
+    website = URLField(
         max_length=255  # https://tools.ietf.org/html/rfc3986
     )
-    tags = models.ManyToManyField(Tag)
+    tags = ManyToManyField(Tag)
 
     class Meta:
         get_latest_by = "founded_date"
@@ -61,18 +72,16 @@ class Startup(models.Model):
         return self.name
 
 
-class NewsLink(models.Model):
+class NewsLink(Model):
     """Link to external sources about a Startup"""
 
-    title = models.CharField(max_length=63)
-    slug = models.SlugField(max_length=63)
-    pub_date = models.DateField("date published")
-    link = models.URLField(
+    title = CharField(max_length=63)
+    slug = SlugField(max_length=63)
+    pub_date = DateField("date published")
+    link = URLField(
         max_length=255  # https://tools.ietf.org/html/rfc3986
     )
-    startup = models.ForeignKey(
-        Startup, on_delete=models.CASCADE
-    )
+    startup = ForeignKey(Startup, on_delete=CASCADE)
 
     class Meta:
         get_latest_by = "pub_date"
