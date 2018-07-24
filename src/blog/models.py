@@ -2,6 +2,8 @@
 
 Django Model Documentation:
 https://docs.djangoproject.com/en/2.1/topics/db/models/
+https://docs.djangoproject.com/en/2.1/ref/models/options/
+https://docs.djangoproject.com/en/2.1/internals/contributing/writing-code/coding-style/#model-style
 Django Field Reference:
 https://docs.djangoproject.com/en/2.1/ref/models/fields/
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#charfield
@@ -37,6 +39,11 @@ class Post(models.Model):
     startups = models.ManyToManyField(
         Startup, related_name="blog_posts"
     )
+
+    class Meta:
+        get_latest_by = "pub_date"
+        ordering = ["-pub_date", "title"]
+        verbose_name = "blog post"
 
     def __str__(self):
         date_string = self.pub_date.strftime("%Y-%m-%d")

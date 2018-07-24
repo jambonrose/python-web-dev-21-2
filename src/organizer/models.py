@@ -2,6 +2,8 @@
 
 Django Model Documentation:
 https://docs.djangoproject.com/en/2.1/topics/db/models/
+https://docs.djangoproject.com/en/2.1/ref/models/options/
+https://docs.djangoproject.com/en/2.1/internals/contributing/writing-code/coding-style/#model-style
 Django Field Reference:
 https://docs.djangoproject.com/en/2.1/ref/models/fields/
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#charfield
@@ -27,6 +29,9 @@ class Tag(models.Model):
         help_text="A label for URL config.",
     )
 
+    class Meta:
+        ordering = ["name"]
+
     def __str__(self):
         return self.name
 
@@ -48,6 +53,10 @@ class Startup(models.Model):
     )
     tags = models.ManyToManyField(Tag)
 
+    class Meta:
+        get_latest_by = "founded_date"
+        ordering = ["name"]
+
     def __str__(self):
         return self.name
 
@@ -64,6 +73,12 @@ class NewsLink(models.Model):
     startup = models.ForeignKey(
         Startup, on_delete=models.CASCADE
     )
+
+    class Meta:
+        get_latest_by = "pub_date"
+        ordering = ["-pub_date"]
+        unique_together = ("slug", "startup")
+        verbose_name = "news article"
 
     def __str__(self):
         return f"{self.startup}: {self.title}"
