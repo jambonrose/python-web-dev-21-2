@@ -27,6 +27,9 @@ class Tag(models.Model):
         help_text="A label for URL config.",
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Startup(models.Model):
     """Data about a Startup company"""
@@ -45,6 +48,9 @@ class Startup(models.Model):
     )
     tags = models.ManyToManyField(Tag)
 
+    def __str__(self):
+        return self.name
+
 
 class NewsLink(models.Model):
     """Link to external sources about a Startup"""
@@ -58,3 +64,6 @@ class NewsLink(models.Model):
     startup = models.ForeignKey(
         Startup, on_delete=models.CASCADE
     )
+
+    def __str__(self):
+        return f"{self.startup}: {self.title}"
