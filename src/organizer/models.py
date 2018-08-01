@@ -15,6 +15,9 @@ https://docs.djangoproject.com/en/2.1/ref/models/fields/#slugfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#textfield
 https://docs.djangoproject.com/en/2.1/ref/models/fields/#urlfield
 
+AutoSlugField Reference:
+https://django-extensions.readthedocs.io/en/latest/field_extensions.html
+
 """
 from django.db.models import (
     CASCADE,
@@ -28,16 +31,17 @@ from django.db.models import (
     TextField,
     URLField,
 )
+from django_extensions.db.fields import AutoSlugField
 
 
 class Tag(Model):
     """Labels to help categorize data"""
 
     name = CharField(max_length=31, unique=True)
-    slug = SlugField(
-        max_length=31,
-        unique=True,
+    slug = AutoSlugField(
         help_text="A label for URL config.",
+        max_length=31,
+        populate_from=["name"],
     )
 
     class Meta:
