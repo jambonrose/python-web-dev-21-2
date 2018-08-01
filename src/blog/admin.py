@@ -1,3 +1,6 @@
+"""Configuration of Blog Admin panel"""
 from django.contrib import admin
 
-# Register your models here.
+from .models import Post
+
+admin.site.register(Post)
