@@ -1,3 +1,8 @@
+"""Configuration of Organizer Admin panel"""
 from django.contrib import admin
 
-# Register your models here.
+from .models import NewsLink, Startup, Tag
+
+admin.site.register(NewsLink)
+admin.site.register(Startup)
+admin.site.register(Tag)
