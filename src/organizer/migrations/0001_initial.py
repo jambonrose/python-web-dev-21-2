@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="NewsLink",
+            name="Tag",
             fields=[
                 (
                     "id",
@@ -23,21 +23,22 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("title", models.CharField(max_length=63)),
-                ("slug", models.SlugField(max_length=63)),
                 (
-                    "pub_date",
-                    models.DateField(
-                        verbose_name="date published"
+                    "name",
+                    models.CharField(
+                        max_length=31, unique=True
                     ),
                 ),
-                ("link", models.URLField(max_length=255)),
+                (
+                    "slug",
+                    models.SlugField(
+                        help_text="A label for URL config.",
+                        max_length=31,
+                        unique=True,
+                    ),
+                ),
             ],
-            options={
-                "verbose_name": "news article",
-                "ordering": ["-pub_date"],
-                "get_latest_by": "pub_date",
-            },
+            options={"ordering": ["name"]},
         ),
         migrations.CreateModel(
             name="Startup",
@@ -80,6 +81,12 @@ class Migration(migrations.Migration):
                     "website",
                     models.URLField(max_length=255),
                 ),
+                (
+                    "tags",
+                    models.ManyToManyField(
+                        to="organizer.Tag"
+                    ),
+                ),
             ],
             options={
                 "ordering": ["name"],
@@ -87,7 +94,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="Tag",
+            name="NewsLink",
             fields=[
                 (
                     "id",
@@ -98,37 +105,28 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
+                ("title", models.CharField(max_length=63)),
+                ("slug", models.SlugField(max_length=63)),
                 (
-                    "name",
-                    models.CharField(
-                        max_length=31, unique=True
+                    "pub_date",
+                    models.DateField(
+                        verbose_name="date published"
                     ),
                 ),
+                ("link", models.URLField(max_length=255)),
                 (
-                    "slug",
-                    models.SlugField(
-                        help_text="A label for URL config.",
-                        max_length=31,
-                        unique=True,
+                    "startup",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizer.Startup",
                     ),
                 ),
             ],
-            options={"ordering": ["name"]},
-        ),
-        migrations.AddField(
-            model_name="startup",
-            name="tags",
-            field=models.ManyToManyField(
-                to="organizer.Tag"
-            ),
-        ),
-        migrations.AddField(
-            model_name="newslink",
-            name="startup",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                to="organizer.Startup",
-            ),
+            options={
+                "verbose_name": "news article",
+                "ordering": ["-pub_date"],
+                "get_latest_by": "pub_date",
+            },
         ),
         migrations.AlterUniqueTogether(
             name="newslink",
