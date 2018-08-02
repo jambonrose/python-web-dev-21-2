@@ -12,4 +12,5 @@ ipython==6.4.0
 jupyter==1.0.0
 pep8-naming==0.7.0
 pre-commit==1.10.4
+psycopg2-binary
 pytz==2018.5
