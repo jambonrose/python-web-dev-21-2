@@ -91,3 +91,24 @@ class NewsLinkModelTests(TestCase):
             "link",
         ]
         self.assertEqual(field_names, expected_field_names)
+
+    def test_newslink_startup_fk(self):
+        """Does NewsLink have a Foreign Key to Startup?
+
+        https://docs.djangoproject.com/en/2.1/ref/models/fields/#field-attribute-reference
+
+        Let's have fun with this one! This is not how you'd write this test
+        normally, but it does demonstrate some interesting field properties.
+
+        """
+        startup_field = NewsLink._meta.get_field("startup")
+        # check nature of field
+        self.assertFalse(startup_field.auto_created)
+        self.assertTrue(startup_field.is_relation)
+        self.assertTrue(startup_field.many_to_one)
+        self.assertIs(startup_field.related_model, Startup)
+        # the checks below are technically redundant
+        self.assertTrue(startup_field.concrete)
+        self.assertFalse(startup_field.one_to_one)
+        self.assertFalse(startup_field.one_to_many)
+        self.assertFalse(startup_field.many_to_many)
