@@ -4,6 +4,7 @@ from datetime import date
 from django.test import TestCase
 
 from config.test_utils import get_concrete_field_names
+from organizer.models import Startup, Tag
 
 from ..models import Post
 from .factories import PostFactory
@@ -23,6 +24,24 @@ class PostModelTests(TestCase):
             "pub_date",
         ]
         self.assertEqual(field_names, expected_field_names)
+
+    def test_post_m2m_fields(self):
+        """Are Posts Many-To-Many with Tags and Startups?"""
+        post_m2m_fields = [
+            field.name
+            for field in Post._meta.get_fields()
+            if not field.auto_created and field.many_to_many
+        ]
+        self.assertEqual(
+            post_m2m_fields, ["tags", "startups"]
+        )
+        self.assertIs(
+            Post._meta.get_field("tags").related_model, Tag
+        )
+        self.assertIs(
+            Post._meta.get_field("startups").related_model,
+            Startup,
+        )
 
     def test_post_list_order(self):
         """Are posts ordered by primary-key?"""
