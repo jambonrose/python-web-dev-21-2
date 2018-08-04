@@ -76,6 +76,27 @@ class StartupModelTests(TestCase):
             startup_name_list, expected_name_list
         )
 
+    def test_tag_m2m(self):
+        """Do Startups have Many-To-Many Tags?
+
+        https://docs.djangoproject.com/en/2.1/ref/models/fields/#field-attribute-reference
+
+        Let's have fun with this one! This is not how you'd write this test
+        normally, but it does demonstrate some interesting field properties.
+
+        """
+        tags_field = Startup._meta.get_field("tags")
+        # check nature of field
+        self.assertFalse(tags_field.auto_created)
+        self.assertTrue(tags_field.is_relation)
+        self.assertTrue(tags_field.many_to_many)
+        self.assertIs(tags_field.related_model, Tag)
+        # the checks below are technically redundant
+        self.assertTrue(tags_field.concrete)
+        self.assertFalse(tags_field.one_to_one)
+        self.assertFalse(tags_field.one_to_many)
+        self.assertFalse(tags_field.many_to_one)
+
 
 class NewsLinkModelTests(TestCase):
     """Tests for the NewsLink model"""
