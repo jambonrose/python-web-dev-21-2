@@ -52,7 +52,7 @@ class PostModelTests(TestCase):
         self.assertEqual(str(p), "b on 2017-01-01")
 
     def test_post_list_order(self):
-        """Are posts ordered by primary-key?"""
+        """Are posts ordered by date?"""
         PostFactory(title="b", pub_date=date(2017, 1, 1))
         PostFactory(title="a", pub_date=date(2016, 1, 1))
         PostFactory(title="a", pub_date=date(2017, 1, 1))
@@ -64,10 +64,10 @@ class PostModelTests(TestCase):
             )
         ]
         expected_name_list = [
+            ("d", 2018),
+            ("a", 2017),
             ("b", 2017),
             ("a", 2016),
-            ("a", 2017),
-            ("d", 2018),
         ]
         self.assertEqual(post_name_list, expected_name_list)
 
@@ -77,3 +77,14 @@ class PostModelTests(TestCase):
         PostFactory(**kwargs)
         with self.assertRaises(ValidationError):
             PostFactory.build(**kwargs).validate_unique()
+
+    def test_get_latest(self):
+        """Can managers get the latest Post?"""
+        PostFactory(title="b", pub_date=date(2017, 1, 1))
+        PostFactory(title="a", pub_date=date(2016, 1, 1))
+        PostFactory(title="a", pub_date=date(2017, 1, 1))
+        latest = PostFactory(
+            title="d", pub_date=date(2018, 1, 1)
+        )
+        found = Post.objects.latest()
+        self.assertEqual(latest, found)

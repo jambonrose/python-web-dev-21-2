@@ -1,4 +1,6 @@
 """Test for blog app"""
+from datetime import date
+
 from django.db import IntegrityError
 from django.test import TestCase
 
@@ -133,6 +135,20 @@ class StartupModelTests(TestCase):
         t = StartupFactory(name="JamBon")
         self.assertEqual(str(t), "JamBon")
 
+    def test_get_latest(self):
+        """Can managers get the youngest Startup?"""
+        StartupFactory(
+            name="b", founded_date=date(2017, 1, 1)
+        )
+        StartupFactory(
+            name="d", founded_date=date(2016, 1, 1)
+        )
+        latest = StartupFactory(
+            name="z", founded_date=date(2018, 1, 1)
+        )
+        found = Startup.objects.latest()
+        self.assertEqual(found, latest)
+
 
 class NewsLinkModelTests(TestCase):
     """Tests for the NewsLink model"""
@@ -179,3 +195,11 @@ class NewsLinkModelTests(TestCase):
         self.assertEqual(
             str(nl), "JamBon: consult and teach!"
         )
+
+    def test_uniqueness(self):
+        """Are articles for a startup unique by slug?"""
+        s = StartupFactory(name="JamBon")
+        kwargs = dict(slug="new", startup=s)
+        NewsLinkFactory(**kwargs)
+        with self.assertRaises(IntegrityError):
+            NewsLinkFactory(**kwargs)
