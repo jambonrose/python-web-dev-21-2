@@ -1,6 +1,7 @@
 """Test for blog app"""
 from datetime import date
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from config.test_utils import get_concrete_field_names
@@ -62,3 +63,10 @@ class PostModelTests(TestCase):
             ("d", 2018),
         ]
         self.assertEqual(post_name_list, expected_name_list)
+
+    def test_post_slug_uniqueness(self):
+        """Are Posts with identical slugs in the same month disallowed?"""
+        kwargs = dict(slug="a", pub_date=date(2018, 1, 1))
+        PostFactory(**kwargs)
+        with self.assertRaises(ValidationError):
+            PostFactory.build(**kwargs).validate_unique()

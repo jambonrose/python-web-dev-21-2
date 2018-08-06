@@ -1,4 +1,5 @@
 """Test for blog app"""
+from django.db import IntegrityError
 from django.test import TestCase
 
 from config.test_utils import get_concrete_field_names
@@ -16,8 +17,22 @@ class TagModelTests(TestCase):
         expected_field_names = ["id", "name", "slug"]
         self.assertEqual(field_names, expected_field_names)
 
+    def test_name_uniqueness(self):
+        """Are Tags with identical names disallowed?"""
+        kwargs = dict(name="a")
+        TagFactory(**kwargs)
+        with self.assertRaises(IntegrityError):
+            TagFactory(**kwargs)
+
+    def test_slug_uniqueness(self):
+        """Are Tags with identical slugs disallowed?"""
+        kwargs = dict(slug="a")
+        TagFactory(**kwargs)
+        with self.assertRaises(IntegrityError):
+            TagFactory(**kwargs)
+
     def test_list_order(self):
-        """Are tags ordered by primary-key?
+        """Are tags ordered by name?
 
         This test is actually dependent on the database and whether the
         field is unique. In SQLite3, the order will be alphabetical if
@@ -33,7 +48,7 @@ class TagModelTests(TestCase):
         tag_name_list = list(
             Tag.objects.values_list("name", flat=True)
         )
-        expected_name_list = ["b", "D", "c", "a"]
+        expected_name_list = ["D", "a", "b", "c"]
         self.assertEqual(tag_name_list, expected_name_list)
 
 
@@ -54,8 +69,15 @@ class StartupModelTests(TestCase):
         ]
         self.assertEqual(field_names, expected_field_names)
 
+    def test_slug_uniqueness(self):
+        """Are Startups with identical slugs disallowed?"""
+        kwargs = dict(slug="a")
+        StartupFactory(**kwargs)
+        with self.assertRaises(IntegrityError):
+            StartupFactory(**kwargs)
+
     def test_list_order(self):
-        """Are Startups ordered by primary-key?
+        """Are Startups ordered by name?
 
         This test is actually dependent on the database and whether the
         field is unique. In SQLite3, the order will be alphabetical if
@@ -71,7 +93,7 @@ class StartupModelTests(TestCase):
         startup_name_list = list(
             Startup.objects.values_list("name", flat=True)
         )
-        expected_name_list = ["b", "D", "c", "a"]
+        expected_name_list = ["D", "a", "b", "c"]
         self.assertEqual(
             startup_name_list, expected_name_list
         )
