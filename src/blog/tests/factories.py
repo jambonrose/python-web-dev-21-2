@@ -4,6 +4,7 @@ from random import randint
 from factory import (
     DjangoModelFactory,
     Faker,
+    Sequence,
     post_generation,
 )
 
@@ -21,7 +22,7 @@ class PostFactory(DjangoModelFactory):
     title = Faker(
         "sentence", nb_words=3, variable_nb_words=True
     )
-    slug = Faker("slug")
+    slug = Sequence(lambda n: f"slug-{n}")
     text = Faker(
         "paragraph",
         nb_sentences=3,

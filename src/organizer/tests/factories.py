@@ -4,6 +4,7 @@ from random import randint
 from factory import (
     DjangoModelFactory,
     Faker,
+    Sequence,
     SubFactory,
     post_generation,
 )
@@ -14,8 +15,8 @@ from ..models import NewsLink, Startup, Tag
 class TagFactory(DjangoModelFactory):
     """Factory for Tags (labels)"""
 
-    name = Faker("domain_word")
-    slug = Faker("slug")
+    name = Sequence(lambda n: f"name-{n}")
+    slug = Sequence(lambda n: f"slug-{n}")
 
     class Meta:
         model = Tag
@@ -24,8 +25,8 @@ class TagFactory(DjangoModelFactory):
 class StartupFactory(DjangoModelFactory):
     """Factory for startup company data"""
 
-    name = Faker("company")
-    slug = Faker("slug")
+    name = Sequence(lambda n: f"name-{n}")
+    slug = Sequence(lambda n: f"slug-{n}")
     description = Faker("catch_phrase")
     founded_date = Faker(
         "date_this_decade", before_today=True
@@ -59,7 +60,7 @@ class NewsLinkFactory(DjangoModelFactory):
     title = Faker(
         "sentence", nb_words=3, variable_nb_words=True
     )
-    slug = Faker("slug")
+    slug = Sequence(lambda n: f"slug-{n}")
     pub_date = Faker("date_this_decade", before_today=True)
     link = Faker("uri")
     startup = SubFactory(StartupFactory)
