@@ -5,7 +5,11 @@ from django.test import TestCase
 from config.test_utils import get_concrete_field_names
 
 from ..models import NewsLink, Startup, Tag
-from .factories import StartupFactory, TagFactory
+from .factories import (
+    NewsLinkFactory,
+    StartupFactory,
+    TagFactory,
+)
 
 
 class TagModelTests(TestCase):
@@ -50,6 +54,11 @@ class TagModelTests(TestCase):
         )
         expected_name_list = ["D", "a", "b", "c"]
         self.assertEqual(tag_name_list, expected_name_list)
+
+    def test_str(self):
+        """Do Tags clearly represent themselves?"""
+        t = TagFactory(name="django")
+        self.assertEqual(str(t), "django")
 
 
 class StartupModelTests(TestCase):
@@ -119,6 +128,11 @@ class StartupModelTests(TestCase):
         self.assertFalse(tags_field.one_to_many)
         self.assertFalse(tags_field.many_to_one)
 
+    def test_startup_str(self):
+        """Do Startups clearly represent themselves?"""
+        t = StartupFactory(name="JamBon")
+        self.assertEqual(str(t), "JamBon")
+
 
 class NewsLinkModelTests(TestCase):
     """Tests for the NewsLink model"""
@@ -155,3 +169,13 @@ class NewsLinkModelTests(TestCase):
         self.assertFalse(startup_field.one_to_one)
         self.assertFalse(startup_field.one_to_many)
         self.assertFalse(startup_field.many_to_many)
+
+    def test_str(self):
+        """Do articles clearly represent themselves?"""
+        s = StartupFactory(name="JamBon")
+        nl = NewsLinkFactory(
+            title="consult and teach!", startup=s
+        )
+        self.assertEqual(
+            str(nl), "JamBon: consult and teach!"
+        )

@@ -44,6 +44,13 @@ class PostModelTests(TestCase):
             Startup,
         )
 
+    def test_str(self):
+        """Do Posts clearly represent themselves?"""
+        p = PostFactory(
+            title="b", pub_date=date(2017, 1, 1)
+        )
+        self.assertEqual(str(p), "b on 2017-01-01")
+
     def test_post_list_order(self):
         """Are posts ordered by primary-key?"""
         PostFactory(title="b", pub_date=date(2017, 1, 1))
