@@ -33,11 +33,20 @@ class TagModelTests(TestCase):
             TagFactory(**kwargs)
 
     def test_slug_uniqueness(self):
-        """Are Tags with identical slugs disallowed?"""
-        kwargs = dict(slug="a")
-        TagFactory(**kwargs)
-        with self.assertRaises(IntegrityError):
-            TagFactory(**kwargs)
+        """Are Tags generated with unique slugs?
+
+        This test is a little tricky. We need to force the system to
+        generate the same slug based on distinct values. Thankfully, we
+        know that slugs have spaces removed, so we can rely on this to
+        create Tags named 'a ' and ' a'. These should thus both generate
+        a slug 'a'. The second to be generated will need to generate a
+        different value, however, as the first will have already taken
+        the slug 'a'.
+        """
+        t1 = Tag.objects.create(name="a ")
+        t2 = Tag.objects.create(name=" a")
+        self.assertEqual("a", t1.slug)
+        self.assertEqual("a-2", t2.slug)
 
     def test_list_order(self):
         """Are tags ordered by name?
