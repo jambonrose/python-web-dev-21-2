@@ -1,7 +1,11 @@
 """Views for Organizer App"""
 import json
 
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
+from django.shortcuts import (
+    get_list_or_404,
+    get_object_or_404,
+)
 from django.views import View
 
 from .models import Tag
@@ -12,10 +16,7 @@ class TagAPIDetail(View):
 
     def get(self, request, pk):
         """Handle GET HTTP method"""
-        try:
-            tag = Tag.objects.get(pk=pk)
-        except Tag.DoesNotExist:
-            raise Http404("Tag not found")
+        tag = get_object_or_404(Tag, pk=pk)
         tag_json = json.dumps(
             dict(id=tag.pk, name=tag.name, slug=tag.slug)
         )
@@ -27,9 +28,7 @@ class TagAPIList(View):
 
     def get(self, request):
         """Handle GET HTTP method"""
-        tag_list = Tag.objects.all()
-        if not tag_list:
-            raise Http404("No tags found")
+        tag_list = get_list_or_404(Tag)
         tag_json = json.dumps(
             [
                 dict(
