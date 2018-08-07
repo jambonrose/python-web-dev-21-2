@@ -20,7 +20,9 @@ class TagAPIDetail(View):
         tag_json = json.dumps(
             dict(id=tag.pk, name=tag.name, slug=tag.slug)
         )
-        return HttpResponse(tag_json)
+        return HttpResponse(
+            tag_json, content_type="text/json"
+        )
 
 
 class TagAPIList(View):
@@ -37,4 +39,6 @@ class TagAPIList(View):
                 for tag in tag_list
             ]
         )
-        return HttpResponse(tag_json)
+        return HttpResponse(
+            tag_json, content_type="text/json"
+        )
