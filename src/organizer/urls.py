@@ -1,8 +1,13 @@
 """URL Configuration for Organizer App"""
 from django.urls import path
 
-from .views import HelloWorld
+from .views import TagAPIDetail, TagAPIList
 
 urlpatterns = [
-    path("", HelloWorld.as_view(), name="hello_world")
+    path("", TagAPIList.as_view(), name="api-tag-list"),
+    path(
+        "<int:pk>/",
+        TagAPIDetail.as_view(),
+        name="api-tag-detail",
+    ),
 ]
