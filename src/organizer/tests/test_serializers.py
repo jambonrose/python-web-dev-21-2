@@ -7,8 +7,16 @@ from config.test_utils import (
     omit_keys,
 )
 
-from ..serializers import StartupSerializer, TagSerializer
-from .factories import StartupFactory, TagFactory
+from ..serializers import (
+    NewsLinkSerializer,
+    StartupSerializer,
+    TagSerializer,
+)
+from .factories import (
+    NewsLinkFactory,
+    StartupFactory,
+    TagFactory,
+)
 
 
 class TagSerializerTests(TestCase):
@@ -67,3 +75,44 @@ class StartupSerializerTests(TestCase):
         """Does the serializer validate data?"""
         s_startup = StartupSerializer(data={})
         self.assertFalse(s_startup.is_valid())
+
+
+class NewsLinkSerializerTests(TestCase):
+    """Test Serialization of NewsLinks in NewsLinkSerializer"""
+
+    def test_serialization(self):
+        """Does an existing NewsLink serialize correctly?"""
+        nl = NewsLinkFactory()
+        s_nl = NewsLinkSerializer(nl)
+        self.assertEqual(
+            omit_keys("startup", s_nl.data),
+            omit_keys("startup", get_instance_data(nl)),
+        )
+        self.assertEqual(
+            s_nl.data["startup"]["id"], nl.startup.pk
+        )
+
+    def test_deserialization(self):
+        """Can we deserialize data to a NewsLink model?"""
+        tag_dicts = lmap(
+            get_instance_data, TagFactory.build_batch(3)
+        )
+        startup_data = omit_keys(
+            "tags",
+            get_instance_data(StartupFactory.build()),
+        )
+        nl_data = omit_keys(
+            "startup",
+            get_instance_data(NewsLinkFactory.build()),
+        )
+        data = dict(
+            **nl_data,
+            startup=dict(**startup_data, tags=tag_dicts)
+        )
+        s_nl = NewsLinkSerializer(data=data)
+        self.assertTrue(s_nl.is_valid(), msg=s_nl.errors)
+
+    def test_invalid_deserialization(self):
+        """Does the serializer validate data?"""
+        s_nl = NewsLinkSerializer(data={})
+        self.assertFalse(s_nl.is_valid())
