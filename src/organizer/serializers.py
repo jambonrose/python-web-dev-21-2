@@ -37,3 +37,16 @@ class StartupSerializer(Serializer):
         max_length=255  # https://tools.ietf.org/html/rfc3986
     )
     tags = TagSerializer(many=True)
+
+
+class NewsLinkSerializer(Serializer):
+    """Serialize NewsLink data"""
+
+    id = IntegerField(read_only=True)
+    title = CharField(max_length=63)
+    slug = SlugField(max_length=63)
+    pub_date = DateField()
+    link = URLField(
+        max_length=255  # https://tools.ietf.org/html/rfc3986
+    )
+    startup = StartupSerializer()
