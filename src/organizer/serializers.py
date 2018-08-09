@@ -17,7 +17,7 @@ class TagSerializer(ModelSerializer):
     """Serialize Tag data"""
 
     url = HyperlinkedIdentityField(
-        view_name="api-tag-detail"
+        lookup_field="slug", view_name="api-tag-detail"
     )
 
     class Meta:
