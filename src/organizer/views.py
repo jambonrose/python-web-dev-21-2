@@ -13,9 +13,9 @@ from .serializers import TagSerializer
 class TagAPIDetail(APIView):
     """Return JSON for single Tag object"""
 
-    def get(self, request, pk):
+    def get(self, request, slug):
         """Handle GET HTTP method"""
-        tag = get_object_or_404(Tag, pk=pk)
+        tag = get_object_or_404(Tag, slug=slug)
         s_tag = TagSerializer(
             tag, context={"request": request}
         )

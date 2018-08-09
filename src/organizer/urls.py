@@ -6,7 +6,7 @@ from .views import TagAPIDetail, TagAPIList
 urlpatterns = [
     path("", TagAPIList.as_view(), name="api-tag-list"),
     path(
-        "<int:pk>/",
+        "<str:slug>/",
         TagAPIDetail.as_view(),
         name="api-tag-detail",
     ),
