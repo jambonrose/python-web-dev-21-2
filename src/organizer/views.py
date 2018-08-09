@@ -16,7 +16,9 @@ class TagAPIDetail(APIView):
     def get(self, request, pk):
         """Handle GET HTTP method"""
         tag = get_object_or_404(Tag, pk=pk)
-        s_tag = TagSerializer(tag)
+        s_tag = TagSerializer(
+            tag, context={"request": request}
+        )
         return Response(s_tag.data)
 
 
@@ -26,5 +28,9 @@ class TagAPIList(APIView):
     def get(self, request):
         """Handle GET HTTP method"""
         tag_list = get_list_or_404(Tag)
-        s_tag = TagSerializer(tag_list, many=True)
+        s_tag = TagSerializer(
+            tag_list,
+            many=True,
+            context={"request": request},
+        )
         return Response(s_tag.data)
