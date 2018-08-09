@@ -1,31 +1,14 @@
 """Views for Organizer App"""
-import json
-
 from django.http import HttpResponse
 from django.shortcuts import (
     get_list_or_404,
     get_object_or_404,
 )
 from django.views import View
+from rest_framework.renderers import JSONRenderer
 
 from .models import Tag
-
-
-def serialize_tag_to_dict(tag):
-    """Tag -> Python Dict"""
-    return dict(id=tag.pk, name=tag.name, slug=tag.slug)
-
-
-def serialize_tag_to_json(tag):
-    """Tag -> JSON"""
-    return json.dumps(serialize_tag_to_dict(tag))
-
-
-def serialize_tag_list_to_json(tag_list):
-    """[Tag] -> JSON"""
-    return json.dumps(
-        [serialize_tag_to_dict(tag) for tag in tag_list]
-    )
+from .serializers import TagSerializer
 
 
 class TagAPIDetail(View):
@@ -34,7 +17,8 @@ class TagAPIDetail(View):
     def get(self, request, pk):
         """Handle GET HTTP method"""
         tag = get_object_or_404(Tag, pk=pk)
-        tag_json = serialize_tag_to_json(tag)
+        s_tag = TagSerializer(tag)
+        tag_json = JSONRenderer().render(s_tag.data)
         return HttpResponse(
             tag_json, content_type="application/json"
         )
@@ -46,7 +30,8 @@ class TagAPIList(View):
     def get(self, request):
         """Handle GET HTTP method"""
         tag_list = get_list_or_404(Tag)
-        tag_json = serialize_tag_list_to_json(tag_list)
+        s_tag = TagSerializer(tag_list, many=True)
+        tag_json = JSONRenderer().render(s_tag.data)
         return HttpResponse(
             tag_json, content_type="application/json"
         )
