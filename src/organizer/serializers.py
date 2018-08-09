@@ -5,13 +5,20 @@ http://www.django-rest-framework.org/api-guide/serializers/
 http://www.django-rest-framework.org/api-guide/fields/
 http://www.django-rest-framework.org/api-guide/relations/
 """
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import (
+    HyperlinkedIdentityField,
+    ModelSerializer,
+)
 
 from .models import NewsLink, Startup, Tag
 
 
 class TagSerializer(ModelSerializer):
     """Serialize Tag data"""
+
+    url = HyperlinkedIdentityField(
+        view_name="api-tag-detail"
+    )
 
     class Meta:
         model = Tag
