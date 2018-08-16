@@ -33,7 +33,7 @@ class TagSerializerTests(TestCase):
         s_tag = TagSerializer(tag, **context_kwarg(tag_url))
         self.assertEqual(
             omit_keys("url", s_tag.data),
-            get_instance_data(tag),
+            omit_keys("id", get_instance_data(tag)),
         )
         self.assertEqual(s_tag.data["url"], tag_url)
 

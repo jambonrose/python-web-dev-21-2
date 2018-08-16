@@ -8,6 +8,7 @@ from config.test_utils import get_instance_data, omit_keys
 
 from .factories import TagFactory
 
+omit_id = partial(omit_keys, "id")
 omit_url = partial(omit_keys, "url")
 
 
@@ -27,7 +28,10 @@ class TagAPITests(APITestCase):
         self.get_check_200("api-tag-list")
         self.assertCountEqual(
             map(omit_url, self.response_json),
-            map(get_instance_data, tag_list),
+            [
+                omit_id(get_instance_data(tag))
+                for tag in tag_list
+            ],
         )
 
     def test_list_404(self):
@@ -41,7 +45,7 @@ class TagAPITests(APITestCase):
         self.get_check_200("api-tag-detail", slug=tag.slug)
         self.assertEqual(
             omit_url(self.response_json),
-            get_instance_data(tag),
+            omit_id(get_instance_data(tag)),
         )
 
     def test_detail_404(self):
