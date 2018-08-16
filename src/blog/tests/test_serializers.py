@@ -4,6 +4,7 @@ from functools import partial
 from django.test import TestCase
 
 from config.test_utils import (
+    context_kwarg,
     get_instance_data,
     lmap,
     omit_keys,
@@ -35,18 +36,25 @@ class PostSerializerTests(TestCase):
         post = PostFactory(
             tags=tag_list, startups=startup_list
         )
-        s_post = PostSerializer(post)
+        post_ctxt = context_kwarg(
+            f"/api/v1/startup/{post.slug}"
+        )
+        s_post = PostSerializer(post, **post_ctxt)
         self.assertEqual(
             remove_m2m(s_post.data),
             remove_m2m(get_instance_data(post)),
         )
         self.assertCountEqual(
             s_post.data["tags"],
-            TagSerializer(tag_list, many=True).data,
+            TagSerializer(
+                tag_list, many=True, **post_ctxt
+            ).data,
         )
         self.assertCountEqual(
             s_post.data["startups"],
-            StartupSerializer(startup_list, many=True).data,
+            StartupSerializer(
+                startup_list, many=True, **post_ctxt
+            ).data,
         )
 
     def test_deserialization(self):
@@ -70,7 +78,9 @@ class PostSerializerTests(TestCase):
                 {**startup_data, "tags": startup_tag_dicts}
             ],
         )
-        s_post = PostSerializer(data=data)
+        s_post = PostSerializer(
+            data=data, **context_kwarg(f"/api/v1/startup/")
+        )
         self.assertTrue(
             s_post.is_valid(), msg=s_post.errors
         )

@@ -2,6 +2,7 @@
 from django.test import TestCase
 
 from config.test_utils import (
+    context_kwarg,
     get_instance_data,
     lmap,
     omit_keys,
@@ -25,18 +26,23 @@ class TagSerializerTests(TestCase):
     def test_serialization(self):
         """Does an existing Tag serialize correctly?"""
         tag = TagFactory()
-        s_tag = TagSerializer(tag)
+        tag_url = f"/api/v1/tag/{tag.slug}/"
+        s_tag = TagSerializer(tag, **context_kwarg(tag_url))
         self.assertEqual(s_tag.data, get_instance_data(tag))
 
     def test_deserialization(self):
         """Can we deserialize data to a Tag model?"""
         tag_data = get_instance_data(TagFactory.build())
-        s_tag = TagSerializer(data=tag_data)
+        s_tag = TagSerializer(
+            data=tag_data, **context_kwarg("/api/v1/tag/")
+        )
         self.assertTrue(s_tag.is_valid(), s_tag.errors)
 
     def test_invalid_deserialization(self):
         """Does the serializer validate data?"""
-        s_tag = TagSerializer(data={})
+        s_tag = TagSerializer(
+            data={}, **context_kwarg("/api/v1/tag/")
+        )
         self.assertFalse(s_tag.is_valid())
 
 
@@ -47,14 +53,21 @@ class StartupSerializerTests(TestCase):
         """Does an existing Startup serialize correctly?"""
         tag_list = TagFactory.create_batch(3)
         startup = StartupFactory(tags=tag_list)
-        s_startup = StartupSerializer(startup)
+        startup_url = f"/api/v1/startup/{startup.slug}/"
+        s_startup = StartupSerializer(
+            startup, **context_kwarg(startup_url)
+        )
         self.assertEqual(
             omit_keys("tags", s_startup.data),
             omit_keys("tags", get_instance_data(startup)),
         )
         self.assertCountEqual(
             s_startup.data["tags"],
-            TagSerializer(tag_list, many=True).data,
+            TagSerializer(
+                tag_list,
+                many=True,
+                **context_kwarg(startup_url),
+            ).data,
         )
 
     def test_deserialization(self):
@@ -66,14 +79,18 @@ class StartupSerializerTests(TestCase):
             get_instance_data, TagFactory.build_batch(3)
         )
         data = dict(startup_data, tags=tag_dicts)
-        s_startup = StartupSerializer(data=data)
+        s_startup = StartupSerializer(
+            data=data, **context_kwarg("/api/v1/startup/")
+        )
         self.assertTrue(
             s_startup.is_valid(), msg=s_startup.errors
         )
 
     def test_invalid_deserialization(self):
         """Does the serializer validate data?"""
-        s_startup = StartupSerializer(data={})
+        s_startup = StartupSerializer(
+            data={}, **context_kwarg("/api/v1/startup/")
+        )
         self.assertFalse(s_startup.is_valid())
 
 
@@ -83,7 +100,10 @@ class NewsLinkSerializerTests(TestCase):
     def test_serialization(self):
         """Does an existing NewsLink serialize correctly?"""
         nl = NewsLinkFactory()
-        s_nl = NewsLinkSerializer(nl)
+        nl_url = f"/api/v1/newslink/{nl.slug}"
+        s_nl = NewsLinkSerializer(
+            nl, **context_kwarg(nl_url)
+        )
         self.assertEqual(
             omit_keys("startup", s_nl.data),
             omit_keys("startup", get_instance_data(nl)),
@@ -107,12 +127,16 @@ class NewsLinkSerializerTests(TestCase):
         )
         data = dict(
             **nl_data,
-            startup=dict(**startup_data, tags=tag_dicts)
+            startup=dict(**startup_data, tags=tag_dicts),
         )
-        s_nl = NewsLinkSerializer(data=data)
+        s_nl = NewsLinkSerializer(
+            data=data, **context_kwarg("/api/v1/newslink/")
+        )
         self.assertTrue(s_nl.is_valid(), msg=s_nl.errors)
 
     def test_invalid_deserialization(self):
         """Does the serializer validate data?"""
-        s_nl = NewsLinkSerializer(data={})
+        s_nl = NewsLinkSerializer(
+            data={}, **context_kwarg("/api/v1/newslink/")
+        )
         self.assertFalse(s_nl.is_valid())
