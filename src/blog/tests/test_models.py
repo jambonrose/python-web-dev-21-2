@@ -6,6 +6,10 @@ from django.test import TestCase
 
 from config.test_utils import get_concrete_field_names
 from organizer.models import Startup, Tag
+from organizer.tests.factories import (
+    StartupFactory,
+    TagFactory,
+)
 
 from ..models import Post
 from .factories import PostFactory
@@ -88,3 +92,31 @@ class PostModelTests(TestCase):
         )
         found = Post.objects.latest()
         self.assertEqual(latest, found)
+
+    def test_delete(self):
+        """Does deleting a post leave related objects?"""
+        tags = TagFactory.create_batch(5)
+        startups = StartupFactory.create_batch(3, tags=tags)
+        post = PostFactory(tags=tags, startups=startups)
+
+        self.assertIn(tags[0], post.tags.all())
+        self.assertIn(startups[0], post.startups.all())
+        self.assertEqual(
+            Tag.objects.count(),
+            5,
+            "Unexpected initial condition",
+        )
+        self.assertEqual(
+            Startup.objects.count(),
+            3,
+            "Unexpected initial condition",
+        )
+
+        post.delete()
+
+        self.assertEqual(
+            Tag.objects.count(), 5, "Unexpected change"
+        )
+        self.assertEqual(
+            Startup.objects.count(), 3, "Unexpected change"
+        )

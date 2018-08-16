@@ -4,6 +4,8 @@ from datetime import date
 from django.db import IntegrityError
 from django.test import TestCase
 
+from blog.models import Post
+from blog.tests.factories import PostFactory
 from config.test_utils import get_concrete_field_names
 
 from ..models import NewsLink, Startup, Tag
@@ -61,6 +63,40 @@ class TagModelTests(TestCase):
         """Do Tags clearly represent themselves?"""
         t = TagFactory(name="django")
         self.assertEqual(str(t), "django")
+
+    def test_delete(self):
+        """Does deleting a Tag leave related objects?"""
+        tag = TagFactory()
+        startups = StartupFactory.create_batch(
+            3, tags=[tag]
+        )
+        posts = PostFactory.create_batch(
+            3, tags=[tag], startups=startups
+        )
+
+        self.assertEqual(
+            Post.objects.count(),
+            3,
+            "Unexpected initial condition",
+        )
+        self.assertEqual(
+            Startup.objects.count(),
+            3,
+            "Unexpected initial condition",
+        )
+        self.assertEqual(posts[0].tags.all()[0].pk, tag.pk)
+        self.assertEqual(
+            startups[0].tags.all()[0].pk, tag.pk
+        )
+
+        tag.delete()
+
+        self.assertEqual(
+            Post.objects.count(), 3, "Unexpected change"
+        )
+        self.assertEqual(
+            Startup.objects.count(), 3, "Unexpected change"
+        )
 
 
 class StartupModelTests(TestCase):
@@ -135,6 +171,28 @@ class StartupModelTests(TestCase):
         t = StartupFactory(name="JamBon")
         self.assertEqual(str(t), "JamBon")
 
+    def test_delete(self):
+        """Does deleting a startup leave tags alone?"""
+        tags = TagFactory.create_batch(2)
+        startup = StartupFactory(tags=tags)
+
+        self.assertEqual(
+            Tag.objects.count(),
+            2,
+            "Unexpected initial condition",
+        )
+        self.assertIn(
+            tags[0],
+            startup.tags.all(),
+            "Unexpected initial condition",
+        )
+
+        startup.delete()
+
+        self.assertEqual(
+            Tag.objects.count(), 2, "Unexpected change"
+        )
+
     def test_get_latest(self):
         """Can managers get the youngest Startup?"""
         StartupFactory(
@@ -203,3 +261,21 @@ class NewsLinkModelTests(TestCase):
         NewsLinkFactory(**kwargs)
         with self.assertRaises(IntegrityError):
             NewsLinkFactory(**kwargs)
+
+    def test_delete(self):
+        """Does deleting a NewsLink leave the Startup?"""
+        s = StartupFactory()
+        nl = NewsLinkFactory(startup=s)
+
+        self.assertEqual(s.pk, nl.startup.pk)
+        self.assertEqual(
+            Startup.objects.count(),
+            1,
+            "Unexpected initial condition",
+        )
+
+        nl.delete()
+
+        self.assertEqual(
+            Startup.objects.count(), 1, "Unexpected change"
+        )
