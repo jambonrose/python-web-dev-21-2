@@ -38,7 +38,7 @@ class TagAPITests(APITestCase):
     def test_detail(self):
         """Is there a detail view for a Tag object"""
         tag = TagFactory()
-        self.get_check_200("api-tag-detail", pk=tag.pk)
+        self.get_check_200("api-tag-detail", slug=tag.slug)
         self.assertEqual(
             omit_url(self.response_json),
             get_instance_data(tag),
@@ -46,5 +46,5 @@ class TagAPITests(APITestCase):
 
     def test_detail_404(self):
         """Do we generate 404 if tag not found?"""
-        self.get("api-tag-detail", pk=1)
+        self.get("api-tag-detail", slug="nonexistent")
         self.response_404()

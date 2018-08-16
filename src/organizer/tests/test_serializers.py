@@ -28,7 +28,7 @@ class TagSerializerTests(TestCase):
         """Does an existing Tag serialize correctly?"""
         tag = TagFactory()
         tag_url = reverse(
-            "api-tag-detail", pk=tag.pk, full=True
+            "api-tag-detail", slug=tag.slug, full=True
         )
         s_tag = TagSerializer(tag, **context_kwarg(tag_url))
         self.assertEqual(
