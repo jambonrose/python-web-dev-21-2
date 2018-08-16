@@ -27,6 +27,11 @@ class TagAPITests(APITestCase):
             map(get_instance_data, tag_list),
         )
 
+    def test_list_404(self):
+        """Do we generate a 404 if no tags?"""
+        self.get("api-tag-list")
+        self.response_404()
+
     def test_detail(self):
         """Is there a detail view for a Tag object"""
         tag = TagFactory()
@@ -34,3 +39,8 @@ class TagAPITests(APITestCase):
         self.assertEqual(
             self.response_json, get_instance_data(tag)
         )
+
+    def test_detail_404(self):
+        """Do we generate 404 if tag not found?"""
+        self.get("api-tag-detail", pk=1)
+        self.response_404()
