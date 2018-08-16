@@ -1,11 +1,14 @@
 """Tests for Organizer Views"""
 import json
+from functools import partial
 
 from test_plus import APITestCase
 
-from config.test_utils import get_instance_data
+from config.test_utils import get_instance_data, omit_keys
 
 from .factories import TagFactory
+
+omit_url = partial(omit_keys, "url")
 
 
 class TagAPITests(APITestCase):
@@ -23,7 +26,7 @@ class TagAPITests(APITestCase):
         tag_list = TagFactory.create_batch(10)
         self.get_check_200("api-tag-list")
         self.assertCountEqual(
-            self.response_json,
+            map(omit_url, self.response_json),
             map(get_instance_data, tag_list),
         )
 
@@ -37,7 +40,8 @@ class TagAPITests(APITestCase):
         tag = TagFactory()
         self.get_check_200("api-tag-detail", pk=tag.pk)
         self.assertEqual(
-            self.response_json, get_instance_data(tag)
+            omit_url(self.response_json),
+            get_instance_data(tag),
         )
 
     def test_detail_404(self):

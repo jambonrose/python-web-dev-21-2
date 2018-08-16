@@ -6,6 +6,7 @@ from config.test_utils import (
     get_instance_data,
     lmap,
     omit_keys,
+    reverse,
 )
 
 from ..serializers import (
@@ -26,9 +27,15 @@ class TagSerializerTests(TestCase):
     def test_serialization(self):
         """Does an existing Tag serialize correctly?"""
         tag = TagFactory()
-        tag_url = f"/api/v1/tag/{tag.slug}/"
+        tag_url = reverse(
+            "api-tag-detail", pk=tag.pk, full=True
+        )
         s_tag = TagSerializer(tag, **context_kwarg(tag_url))
-        self.assertEqual(s_tag.data, get_instance_data(tag))
+        self.assertEqual(
+            omit_keys("url", s_tag.data),
+            get_instance_data(tag),
+        )
+        self.assertEqual(s_tag.data["url"], tag_url)
 
     def test_deserialization(self):
         """Can we deserialize data to a Tag model?"""
@@ -58,7 +65,7 @@ class StartupSerializerTests(TestCase):
             startup, **context_kwarg(startup_url)
         )
         self.assertEqual(
-            omit_keys("tags", s_startup.data),
+            omit_keys("url", "tags", s_startup.data),
             omit_keys("tags", get_instance_data(startup)),
         )
         self.assertCountEqual(
