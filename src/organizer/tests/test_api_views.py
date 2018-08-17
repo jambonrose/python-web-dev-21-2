@@ -5,8 +5,8 @@ from test_plus import APITestCase
 
 from config.test_utils import context_kwarg, reverse
 
-from ..serializers import TagSerializer
-from .factories import TagFactory
+from ..serializers import StartupSerializer, TagSerializer
+from .factories import StartupFactory, TagFactory
 
 
 class TagAPITests(APITestCase):
@@ -51,4 +51,53 @@ class TagAPITests(APITestCase):
     def test_detail_404(self):
         """Do we generate 404 if tag not found?"""
         self.get("api-tag-detail", slug="nonexistent")
+        self.response_404()
+
+
+class StartupAPITests(APITestCase):
+    """Test API Views for Startup objects"""
+
+    maxDiff = None
+
+    @property
+    def response_json(self):
+        """Shortcut to obtain JSON from last response"""
+        return json.loads(self.last_response.content)
+
+    def test_list(self):
+        """Is there a list of Startup objects"""
+        url_name = "api-startup-list"
+        startup_list = StartupFactory.create_batch(10)
+        self.get_check_200(url_name)
+        self.assertCountEqual(
+            self.response_json,
+            StartupSerializer(
+                startup_list,
+                many=True,
+                **context_kwarg(reverse(url_name))
+            ).data,
+        )
+
+    def test_list_404(self):
+        """Do we generate a 404 if no startups?"""
+        self.get("api-startup-list")
+        self.response_404()
+
+    def test_detail(self):
+        """Is there a detail view for a Startup object"""
+        startup = StartupFactory()
+        url = reverse(
+            "api-startup-detail", slug=startup.slug
+        )
+        self.get_check_200(url)
+        self.assertCountEqual(
+            self.response_json,
+            StartupSerializer(
+                startup, **context_kwarg(url)
+            ).data,
+        )
+
+    def test_detail_404(self):
+        """Do we generate 404 if startup not found?"""
+        self.get("api-startup-detail", pk=1)
         self.response_404()
