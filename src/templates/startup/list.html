@@ -1,11 +1,19 @@
-<h2>Startup List</h2>
-<ul>
-  {% for startup in startup_list %}
-    <li>
-      <a href="">
-        {{ startup.name }}</a>
-    </li>
-  {% empty %}
-    <li><em>No Startups Available</em></li>
-  {% endfor %}
-</ul>
+{% extends parent_template|default:"startup/base.html" %}
+
+{% block title %}
+  {{ block.super }} - Startups
+{% endblock %}
+
+{% block content %}
+  <h2>Startup List</h2>
+  <ul>
+    {% for startup in startup_list %}
+      <li>
+        <a href="">
+          {{ startup.name }}</a>
+      </li>
+    {% empty %}
+      <li><em>No Startups Available</em></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

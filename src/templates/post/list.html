@@ -1,23 +1,31 @@
-{% for post in post_list %}
-  <article>
-    <header>
-      <h2>
-        <a href="">
-          {{ post.title|title }}</a>
-      </h2>
+{% extends parent_template|default:"post/base.html" %}
+
+{% block title %}
+  {{ block.super }} - Blog
+{% endblock %}
+
+{% block content %}
+  {% for post in post_list %}
+    <article>
+      <header>
+        <h2>
+          <a href="">
+            {{ post.title|title }}</a>
+        </h2>
+        <p>
+          Written on:
+          <time datetime="{{ post.pub_date|date:"Y-m-d" }}">
+            {{ post.pub_date|date:"l, F j, Y" }}
+          </time>
+        </p>
+      </header>
+      <p>{{ post.text|truncatewords:20 }}</p>
       <p>
-        Written on:
-        <time datetime="{{ post.pub_date|date:"Y-m-d" }}">
-          {{ post.pub_date|date:"l, F j, Y" }}
-        </time>
+        <a href="">
+          Read more…</a>
       </p>
-    </header>
-    <p>{{ post.text|truncatewords:20 }}</p>
-    <p>
-      <a href="">
-        Read more…</a>
-    </p>
-  </article>
-{% empty %}
-  <p><em>No Blog Posts Available</em></p>
-{% endfor %}
+    </article>
+  {% empty %}
+    <p><em>No Blog Posts Available</em></p>
+  {% endfor %}
+{% endblock %}
