@@ -1,7 +1,7 @@
 """Tests for (traditional/HTML) views for Organizer App"""
 from test_plus import TestCase
 
-from .factories import TagFactory
+from .factories import StartupFactory, TagFactory
 
 
 class TagViewTests(TestCase):
@@ -60,4 +60,65 @@ class TagViewTests(TestCase):
     def test_tag_detail_404(self):
         """Do we return 404 for missing Tags?"""
         self.get("tag_detail", slug="nonexistent")
+        self.response_404()
+
+
+class StartupViewTests(TestCase):
+    """Tests for views that return Startups in HTML"""
+
+    def test_startup_list(self):
+        """Do we render lists of startups?"""
+        startup_list = StartupFactory.create_batch(5)
+        self.get_check_200("startup_list")
+        self.assertInContext("startup_list")
+        self.assertCountEqual(
+            self.get_context("startup_list"), startup_list
+        )
+        self.assertTemplateUsed(
+            self.last_response, "startup/list.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "startup/base.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "base.html"
+        )
+
+    def test_startup_list_empty(self):
+        """Do we render lists of startups if no startups?"""
+        self.get_check_200("startup_list")
+        self.assertInContext("startup_list")
+        self.assertCountEqual(
+            self.get_context("startup_list"), []
+        )
+        self.assertTemplateUsed(
+            self.last_response, "startup/list.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "startup/base.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "base.html"
+        )
+
+    def test_startup_detail(self):
+        """Do we render details of a startup?"""
+        startup = StartupFactory()
+        self.get_check_200(
+            "startup_detail", slug=startup.slug
+        )
+        self.assertContext("startup", startup)
+        self.assertTemplateUsed(
+            self.last_response, "startup/detail.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "startup/base.html"
+        )
+        self.assertTemplateUsed(
+            self.last_response, "base.html"
+        )
+
+    def test_startup_detail_404(self):
+        """Do we return 404 for missing Startups?"""
+        self.get("startup_detail", slug="nonexistent")
         self.response_404()
