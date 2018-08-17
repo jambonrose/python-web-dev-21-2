@@ -6,8 +6,8 @@ from django.shortcuts import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Tag
-from .serializers import TagSerializer
+from .models import Startup, Tag
+from .serializers import StartupSerializer, TagSerializer
 
 
 class TagAPIDetail(APIView):
@@ -34,3 +34,29 @@ class TagAPIList(APIView):
             context={"request": request},
         )
         return Response(s_tag.data)
+
+
+class StartupAPIDetail(APIView):
+    """Return JSON for single Startup object"""
+
+    def get(self, request, slug):
+        """Handle GET HTTP method"""
+        startup = get_object_or_404(Startup, slug=slug)
+        s_startup = StartupSerializer(
+            startup, context={"request": request}
+        )
+        return Response(s_startup.data)
+
+
+class StartupAPIList(APIView):
+    """Return JSON for multiple Startup objects"""
+
+    def get(self, request):
+        """Handle GET HTTP method"""
+        startup_list = get_list_or_404(Startup)
+        s_startup = StartupSerializer(
+            startup_list,
+            many=True,
+            context={"request": request},
+        )
+        return Response(s_startup.data)
