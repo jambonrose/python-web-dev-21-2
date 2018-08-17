@@ -9,7 +9,7 @@
     <article>
       <header>
         <h2>
-          <a href="">
+          <a href="{{ post.get_absolute_url }}">
             {{ post.title|title }}</a>
         </h2>
         <p>
@@ -21,7 +21,7 @@
       </header>
       <p>{{ post.text|truncatewords:20 }}</p>
       <p>
-        <a href="">
+        <a href="{{ post.get_absolute_url }}">
           Read more…</a>
       </p>
     </article>

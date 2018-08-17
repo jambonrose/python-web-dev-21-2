@@ -9,7 +9,7 @@
   <ul>
     {% for startup in startup_list %}
       <li>
-        <a href="">
+        <a href="{{ startup.get_absolute_url }}">
           {{ startup.name }}</a>
       </li>
     {% empty %}

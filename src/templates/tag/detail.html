@@ -16,7 +16,7 @@
       </p>
       <ul>
         {% for startup in tag.startup_set.all %}
-          <li><a href="">
+          <li><a href="{{ startup.get_absolute_url }}">
             {{ startup.name }}
           </a></li>
         {% endfor %}

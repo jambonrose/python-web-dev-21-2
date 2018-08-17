@@ -24,7 +24,7 @@
               <h3>Startup{{ startup_list|pluralize }}</h3>
               <ul>
                 {% for startup in startup_list %}
-                  <li><a href="">
+                  <li><a href="{{ startup.get_absolute_url }}">
                     {{ startup.name }}
                   </a></li>
                 {% endfor %}
@@ -38,7 +38,7 @@
               <h3>Tag{{ tag_list|pluralize }}</h3>
               <ul>
                 {% for tag in tag_list %}
-                  <li><a href="">
+                  <li><a href="{{ tag.get_absolute_url }}">
                     {{ tag.name|title }}
                   </a></li>
                 {% endfor %}
