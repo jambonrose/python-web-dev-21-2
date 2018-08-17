@@ -2,13 +2,10 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from blog import urls as blog_urls
-from organizer import urls as organizer_urls
+from blog.urls import urlpatterns as blog_urls
+from organizer.urls import urlpatterns as organizer_urls
 
-api_urls = [
-    path("", include(organizer_urls)),
-    path("", include(blog_urls)),
-]
+api_urls = blog_urls + organizer_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
