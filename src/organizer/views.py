@@ -28,6 +28,20 @@ class TagDetail(DetailView):
     template_name = "tag/detail.html"
 
 
+class StartupList(ListView):
+    """Display a list of Startups"""
+
+    queryset = Startup.objects.all()
+    template_name = "startup/list.html"
+
+
+class StartupDetail(DetailView):
+    """Display a single Startup"""
+
+    queryset = Startup.objects.all()
+    template_name = "startup/detail.html"
+
+
 class TagAPIDetail(RetrieveAPIView):
     """Return JSON for single Tag object"""
 
