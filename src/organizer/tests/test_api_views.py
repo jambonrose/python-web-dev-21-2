@@ -33,10 +33,10 @@ class TagAPITests(APITestCase):
             ).data,
         )
 
-    def test_list_404(self):
-        """Do we generate a 404 if no tags?"""
-        self.get("api-tag-list")
-        self.response_404()
+    def test_list_empty(self):
+        """Do we return an empty list if no tags?"""
+        self.get_check_200("api-tag-list")
+        self.assertEquals(self.response_json, [])
 
     def test_detail(self):
         """Is there a detail view for a Tag object"""
@@ -78,10 +78,10 @@ class StartupAPITests(APITestCase):
             ).data,
         )
 
-    def test_list_404(self):
-        """Do we generate a 404 if no startups?"""
-        self.get("api-startup-list")
-        self.response_404()
+    def test_list_empty(self):
+        """Do we return an empty list if no startups?"""
+        self.get_check_200("api-startup-list")
+        self.assertEquals(self.response_json, [])
 
     def test_detail(self):
         """Is there a detail view for a Startup object"""
