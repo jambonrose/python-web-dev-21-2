@@ -1,18 +1,26 @@
-<h2>{{ tag.name|title }}</h2>
-{% if tag.startup_set.all %}
-  <section>
-    <h3>Startup{{ tag.startup_set.count|pluralize }}</h3>
-    <p>
-      Tag is associated with
-      {{ tag.startup_set.count }}
-      startup{{ tag.startup_set.count|pluralize }}.
-    </p>
-    <ul>
-      {% for startup in tag.startup_set.all %}
-        <li><a href="">
-          {{ startup.name }}
-        </a></li>
-      {% endfor %}
-    </ul>
-  </section>
-{% endif %}
+{% extends parent_template|default:"tag/base.html" %}
+
+{% block title %}
+  {{ tag.name|title }}
+{% endblock %}
+
+{% block content %}
+  <h2>{{ tag.name|title }}</h2>
+  {% if tag.startup_set.all %}
+    <section>
+      <h3>Startup{{ tag.startup_set.count|pluralize }}</h3>
+      <p>
+        Tag is associated with
+        {{ tag.startup_set.count }}
+        startup{{ tag.startup_set.count|pluralize }}.
+      </p>
+      <ul>
+        {% for startup in tag.startup_set.all %}
+          <li><a href="">
+            {{ startup.name }}
+          </a></li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+{% endblock %}
