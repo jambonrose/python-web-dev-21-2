@@ -1,0 +1,13 @@
+<h2>Tag List</h2>
+{% if tag_list %}
+  <ul>
+    {% for tag in tag_list %}
+      <li>
+        <a href="">
+          {{ tag.name|title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p><em>There are currently no Tags available.</em></p>
+{% endif %}
