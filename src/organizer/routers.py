@@ -1,4 +1,4 @@
-"""URL Configuration for Organizer App"""
+"""URL Paths and Routers for Organizer App"""
 from django.urls import path
 
 from .views import (
