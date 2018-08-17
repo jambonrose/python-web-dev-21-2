@@ -60,13 +60,19 @@ class StartupSerializerTests(TestCase):
         """Does an existing Startup serialize correctly?"""
         tag_list = TagFactory.create_batch(3)
         startup = StartupFactory(tags=tag_list)
-        startup_url = f"/api/v1/startup/{startup.slug}/"
+        startup_url = reverse(
+            "api-startup-detail",
+            slug=startup.slug,
+            full=True,
+        )
         s_startup = StartupSerializer(
             startup, **context_kwarg(startup_url)
         )
         self.assertEqual(
             omit_keys("url", "tags", s_startup.data),
-            omit_keys("tags", get_instance_data(startup)),
+            omit_keys(
+                "id", "tags", get_instance_data(startup)
+            ),
         )
         self.assertCountEqual(
             s_startup.data["tags"],
@@ -76,6 +82,7 @@ class StartupSerializerTests(TestCase):
                 **context_kwarg(startup_url),
             ).data,
         )
+        self.assertEqual(s_startup.data["url"], startup_url)
 
     def test_deserialization(self):
         """Can we deserialize data to a Startup model?"""
@@ -116,7 +123,7 @@ class NewsLinkSerializerTests(TestCase):
             omit_keys("startup", get_instance_data(nl)),
         )
         self.assertEqual(
-            s_nl.data["startup"]["id"], nl.startup.pk
+            s_nl.data["startup"]["slug"], nl.startup.slug
         )
 
     def test_deserialization(self):
