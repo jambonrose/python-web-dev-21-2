@@ -5,8 +5,16 @@ from test_plus import APITestCase
 
 from config.test_utils import context_kwarg, reverse
 
-from ..serializers import StartupSerializer, TagSerializer
-from .factories import StartupFactory, TagFactory
+from ..serializers import (
+    NewsLinkSerializer,
+    StartupSerializer,
+    TagSerializer,
+)
+from .factories import (
+    NewsLinkFactory,
+    StartupFactory,
+    TagFactory,
+)
 
 
 class TagAPITests(APITestCase):
@@ -100,4 +108,59 @@ class StartupAPITests(APITestCase):
     def test_detail_404(self):
         """Do we generate 404 if startup not found?"""
         self.get("api-startup-detail", pk=1)
+        self.response_404()
+
+
+class NewsLinkAPITests(APITestCase):
+    """Test API Views for NewsLink objects"""
+
+    maxDiff = None
+
+    @property
+    def response_json(self):
+        """Shortcut to obtain JSON from last response"""
+        return json.loads(self.last_response.content)
+
+    def test_list(self):
+        """Is there a list of NewsLink objects"""
+        url_name = "api-newslink-list"
+        newslink_list = NewsLinkFactory.create_batch(10)
+        self.get_check_200(url_name)
+        self.assertCountEqual(
+            self.response_json,
+            NewsLinkSerializer(
+                newslink_list,
+                many=True,
+                **context_kwarg(reverse(url_name))
+            ).data,
+        )
+
+    def test_list_empty(self):
+        """Do we return an empty list if no articles?"""
+        self.get_check_200("api-newslink-list")
+        self.assertEquals(self.response_json, [])
+
+    def test_detail(self):
+        """Is there a detail view for a NewsLink object"""
+        newslink = NewsLinkFactory()
+        url = reverse(
+            "api-newslink-detail",
+            startup_slug=newslink.startup.slug,
+            newslink_slug=newslink.slug,
+        )
+        self.get_check_200(url)
+        self.assertCountEqual(
+            self.response_json,
+            NewsLinkSerializer(
+                newslink, **context_kwarg(url)
+            ).data,
+        )
+
+    def test_detail_404(self):
+        """Do we generate 404 if newslink not found?"""
+        self.get(
+            "api-newslink-detail",
+            startup_slug="django",
+            newslink_slug="the-best",
+        )
         self.response_404()
