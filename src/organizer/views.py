@@ -1,6 +1,6 @@
 """Views for Organizer App"""
 from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_safe
+from django.views import View
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
@@ -14,20 +14,24 @@ from .serializers import (
 )
 
 
-@require_safe
-def tag_list(request):
-    """Render an HTML template of a list of tags"""
-    tag_list = Tag.objects.all()
-    context = {"tag_list": tag_list}
-    return render(request, "tag/list.html", context)
+class TagList(View):
+    """Display a list of Tags"""
+
+    def get(self, request):
+        """Render an HTML template of a list of tags"""
+        tag_list = Tag.objects.all()
+        context = {"tag_list": tag_list}
+        return render(request, "tag/list.html", context)
 
 
-@require_safe
-def tag_detail(request, slug):
-    """Render an HTML template of a tags"""
-    tag = get_object_or_404(Tag, slug=slug)
-    context = {"tag": tag}
-    return render(request, "tag/detail.html", context)
+class TagDetail(View):
+    """Display a single Tag"""
+
+    def get(self, request, slug):
+        """Render an HTML template of a tags"""
+        tag = get_object_or_404(Tag, slug=slug)
+        context = {"tag": tag}
+        return render(request, "tag/detail.html", context)
 
 
 class TagAPIDetail(RetrieveAPIView):
