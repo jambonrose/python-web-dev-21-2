@@ -1,4 +1,4 @@
-"""URL Configuration for Blog App"""
+"""URL Paths and Routers for Blog App"""
 from django.urls import path
 
 from .views import PostAPIDetail, PostAPIList
