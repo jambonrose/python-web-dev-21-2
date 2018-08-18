@@ -63,7 +63,7 @@ class TagAPIList(ListAPIView):
 
     def post(self, request):
         """Create new Tag upon POST"""
-        s_tag = TagSerializer(
+        s_tag = self.serializer_class(
             data=request.data, context={"request": request}
         )
         if s_tag.is_valid():
