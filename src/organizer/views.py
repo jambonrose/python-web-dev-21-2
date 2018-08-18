@@ -3,12 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from rest_framework.generics import (
     ListAPIView,
+    ListCreateAPIView,
     RetrieveAPIView,
-)
-from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_400_BAD_REQUEST,
 )
 
 from .models import NewsLink, Startup, Tag
@@ -55,25 +51,11 @@ class TagAPIDetail(RetrieveAPIView):
     lookup_field = "slug"
 
 
-class TagAPIList(ListAPIView):
+class TagAPIList(ListCreateAPIView):
     """Return JSON for multiple Tag objects"""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-
-    def post(self, request):
-        """Create new Tag upon POST"""
-        s_tag = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
-        if s_tag.is_valid():
-            s_tag.save()
-            return Response(
-                s_tag.data, status=HTTP_201_CREATED
-            )
-        return Response(
-            s_tag.errors, status=HTTP_400_BAD_REQUEST
-        )
 
 
 class StartupAPIDetail(RetrieveAPIView):
