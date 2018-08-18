@@ -5,6 +5,7 @@ from test_plus import APITestCase
 
 from config.test_utils import context_kwarg, reverse
 
+from ..models import Tag
 from ..serializers import (
     NewsLinkSerializer,
     StartupSerializer,
@@ -45,6 +46,13 @@ class TagAPITests(APITestCase):
         """Do we return an empty list if no tags?"""
         self.get_check_200("api-tag-list")
         self.assertEquals(self.response_json, [])
+
+    def test_list_create(self):
+        """Does Tag list view create new objects via POST?"""
+        self.assertEqual(Tag.objects.count(), 0)
+        self.post("api-tag-list", data={"name": "django"})
+        self.response_201()
+        self.assertEqual(Tag.objects.count(), 1)
 
     def test_detail(self):
         """Is there a detail view for a Tag object"""
