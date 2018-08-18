@@ -9,6 +9,7 @@ from config.test_utils import (
     reverse,
 )
 
+from ..models import Tag
 from ..serializers import (
     NewsLinkSerializer,
     StartupSerializer,
@@ -44,6 +45,10 @@ class TagSerializerTests(TestCase):
             data=tag_data, **context_kwarg("/api/v1/tag/")
         )
         self.assertTrue(s_tag.is_valid(), s_tag.errors)
+        tag = s_tag.save()
+        self.assertTrue(
+            Tag.objects.filter(pk=tag.pk).exists()
+        )
 
     def test_invalid_deserialization(self):
         """Does the serializer validate data?"""
