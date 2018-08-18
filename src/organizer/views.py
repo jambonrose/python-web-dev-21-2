@@ -5,11 +5,7 @@ from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
     RetrieveAPIView,
-)
-from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_400_BAD_REQUEST,
+    RetrieveUpdateAPIView,
 )
 
 from .models import NewsLink, Startup, Tag
@@ -48,46 +44,12 @@ class StartupDetail(DetailView):
     template_name = "startup/detail.html"
 
 
-class TagAPIDetail(RetrieveAPIView):
+class TagAPIDetail(RetrieveUpdateAPIView):
     """Return JSON for single Tag object"""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     lookup_field = "slug"
-
-    def put(self, request, slug):
-        """Update existing Tag upon PUT
-
-        All Tag fields are expected.
-        """
-        tag = self.get_object()
-        s_tag = self.serializer_class(
-            tag,
-            data=request.data,
-            context={"request": request},
-        )
-        if s_tag.is_valid():
-            s_tag.save()
-            return Response(s_tag.data, status=HTTP_200_OK)
-        return Response(
-            s_tag.errors, status=HTTP_400_BAD_REQUEST
-        )
-
-    def patch(self, request, slug):
-        """Update existing Tag upon PATCH"""
-        tag = self.get_object()
-        s_tag = self.serializer_class(
-            tag,
-            data=request.data,
-            partial=True,
-            context={"request": request},
-        )
-        if s_tag.is_valid():
-            s_tag.save()
-            return Response(s_tag.data, status=HTTP_200_OK)
-        return Response(
-            s_tag.errors, status=HTTP_400_BAD_REQUEST
-        )
 
 
 class TagAPIList(ListCreateAPIView):
