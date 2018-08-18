@@ -3,16 +3,13 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from rest_framework.generics import (
     ListAPIView,
-    ListCreateAPIView,
     RetrieveAPIView,
-    RetrieveUpdateDestroyAPIView,
 )
 
 from .models import NewsLink, Startup, Tag
 from .serializers import (
     NewsLinkSerializer,
     StartupSerializer,
-    TagSerializer,
 )
 
 
@@ -42,21 +39,6 @@ class StartupDetail(DetailView):
 
     queryset = Startup.objects.all()
     template_name = "startup/detail.html"
-
-
-class TagAPIDetail(RetrieveUpdateDestroyAPIView):
-    """Return JSON for single Tag object"""
-
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    lookup_field = "slug"
-
-
-class TagAPIList(ListCreateAPIView):
-    """Return JSON for multiple Tag objects"""
-
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
 
 
 class StartupAPIDetail(RetrieveAPIView):
