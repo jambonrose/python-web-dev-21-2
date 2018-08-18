@@ -84,6 +84,21 @@ class TagAPITests(APITestCase):
         self.put(url, data={"name": "second"})
         self.response_404()
 
+    def test_detail_partial_update(self):
+        """Can we update a Tag via PATCH?"""
+        tag = TagFactory(name="first")
+        url = reverse("api-tag-detail", slug=tag.slug)
+        self.patch(url, data={"name": "second"})
+        self.response_200()
+        tag.refresh_from_db()
+        self.assertEqual(tag.name, "second")
+
+    def test_detail_partial_update_404(self):
+        """Do we generate 404 if tag not found?"""
+        url = reverse("api-tag-detail", slug="nonexistent")
+        self.patch(url, data={"name": "second"})
+        self.response_404()
+
 
 class StartupAPITests(APITestCase):
     """Test API Views for Startup objects"""
