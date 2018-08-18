@@ -4,7 +4,10 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from config.test_utils import get_concrete_field_names
+from config.test_utils import (
+    get_concrete_field_names,
+    reverse,
+)
 from organizer.models import Startup, Tag
 from organizer.tests.factories import (
     StartupFactory,
@@ -54,6 +57,19 @@ class PostModelTests(TestCase):
             title="b", pub_date=date(2017, 1, 1)
         )
         self.assertEqual(str(p), "b on 2017-01-01")
+
+    def test_absolute_url(self):
+        """Do Posts link to their detail view?"""
+        p = PostFactory()
+        self.assertEqual(
+            p.get_absolute_url(),
+            reverse(
+                "post_detail",
+                year=p.pub_date.year,
+                month=p.pub_date.month,
+                slug=p.slug,
+            ),
+        )
 
     def test_post_list_order(self):
         """Are posts ordered by date?"""

@@ -6,7 +6,10 @@ from django.test import TestCase
 
 from blog.models import Post
 from blog.tests.factories import PostFactory
-from config.test_utils import get_concrete_field_names
+from config.test_utils import (
+    get_concrete_field_names,
+    reverse,
+)
 
 from ..models import NewsLink, Startup, Tag
 from .factories import (
@@ -72,6 +75,14 @@ class TagModelTests(TestCase):
         """Do Tags clearly represent themselves?"""
         t = TagFactory(name="django")
         self.assertEqual(str(t), "django")
+
+    def test_absolute_url(self):
+        """Do Tags link to their detail view?"""
+        tag = TagFactory()
+        self.assertEqual(
+            tag.get_absolute_url(),
+            reverse("tag_detail", slug=tag.slug),
+        )
 
     def test_delete(self):
         """Does deleting a Tag leave related objects?"""
@@ -179,6 +190,14 @@ class StartupModelTests(TestCase):
         """Do Startups clearly represent themselves?"""
         t = StartupFactory(name="JamBon")
         self.assertEqual(str(t), "JamBon")
+
+    def test_absolute_url(self):
+        """Do Startups link to their detail view?"""
+        startup = StartupFactory()
+        self.assertEqual(
+            startup.get_absolute_url(),
+            reverse("startup_detail", slug=startup.slug),
+        )
 
     def test_delete(self):
         """Does deleting a startup leave tags alone?"""
