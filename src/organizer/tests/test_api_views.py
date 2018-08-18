@@ -99,6 +99,20 @@ class TagAPITests(APITestCase):
         self.patch(url, data={"name": "second"})
         self.response_404()
 
+    def test_detail_delete(self):
+        """Can we delete a tag?"""
+        tag = TagFactory()
+        self.delete("api-tag-detail", slug=tag.slug)
+        self.response_204()
+        self.assertFalse(
+            Tag.objects.filter(pk=tag.pk).exists()
+        )
+
+    def test_detail_delete_404(self):
+        """Do we generate 404 if tag not found?"""
+        self.delete("api-tag-detail", slug="nonexistent")
+        self.response_404()
+
 
 class StartupAPITests(APITestCase):
     """Test API Views for Startup objects"""
