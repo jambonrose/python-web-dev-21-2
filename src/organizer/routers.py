@@ -1,5 +1,6 @@
 """URL Paths and Routers for Organizer App"""
 from django.urls import path
+from rest_framework.routers import SimpleRouter
 
 from .views import (
     NewsLinkAPIDetail,
@@ -9,25 +10,11 @@ from .views import (
 )
 from .viewsets import TagViewSet
 
-tag_create_list = TagViewSet.as_view(
-    {"get": "list", "post": "create"}
-)
-tag_retrieve_update_delete = TagViewSet.as_view(
-    {
-        "get": "retrieve",
-        "put": "update",
-        "patch": "partial_update",
-        "delete": "delete",
-    }
-)
+api_router = SimpleRouter()
+api_router.register("tag", TagViewSet, base_name="api-tag")
+api_routes = api_router.urls
 
-urlpatterns = [
-    path("tag/", tag_create_list, name="api-tag-list"),
-    path(
-        "tag/<str:slug>/",
-        tag_retrieve_update_delete,
-        name="api-tag-detail",
-    ),
+urlpatterns = api_routes + [
     path(
         "startup/",
         StartupAPIList.as_view(),

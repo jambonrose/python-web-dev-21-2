@@ -15,6 +15,8 @@ from .serializers import TagSerializer
 class TagViewSet(ViewSet):
     """A set of views for the Tag model"""
 
+    lookup_field = "slug"
+
     def list(self, request):
         """List Tag objects"""
         tag_list = Tag.objects.all()
