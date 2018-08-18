@@ -73,6 +73,22 @@ class TagAPIDetail(RetrieveAPIView):
             s_tag.errors, status=HTTP_400_BAD_REQUEST
         )
 
+    def patch(self, request, slug):
+        """Update existing Tag upon PATCH"""
+        tag = self.get_object()
+        s_tag = self.serializer_class(
+            tag,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        if s_tag.is_valid():
+            s_tag.save()
+            return Response(s_tag.data, status=HTTP_200_OK)
+        return Response(
+            s_tag.errors, status=HTTP_400_BAD_REQUEST
+        )
+
 
 class TagAPIList(ListCreateAPIView):
     """Return JSON for multiple Tag objects"""
