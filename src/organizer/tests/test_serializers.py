@@ -1,5 +1,5 @@
 """Tests for Serializers in the Organizer App"""
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from config.test_utils import (
     context_kwarg,
@@ -89,6 +89,7 @@ class StartupSerializerTests(TestCase):
         )
         self.assertEqual(s_startup.data["url"], startup_url)
 
+    @skipUnlessDBFeature("can_return_ids_from_bulk_insert")
     def test_deserialization(self):
         """Can we deserialize data to a Startup model?"""
         startup_data = get_instance_data(
@@ -109,11 +110,25 @@ class StartupSerializerTests(TestCase):
             0,
             "Unexpected initial condition",
         )
-        s_startup.save()
+        self.assertEqual(
+            Tag.objects.count(),
+            0,
+            "Unexpected initial condition",
+        )
+        startup = s_startup.save()
         self.assertEqual(
             Startup.objects.count(),
             1,
             "Serialized Startup not saved",
+        )
+        self.assertCountEqual(
+            startup.tags.values_list("slug", flat=True),
+            Tag.objects.values_list("slug", flat=True),
+        )
+        self.assertEqual(
+            Tag.objects.count(),
+            3,
+            "Serialized Tags not saved",
         )
 
     def test_invalid_deserialization(self):
