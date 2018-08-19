@@ -24,3 +24,16 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app
+
+  jupyter:
+    init: true
+    build:
+      context: .
+      dockerfile: ./docker/jupyter/Dockerfile
+    depends_on:
+      - postgres
+    env_file: ./.docker-env
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./src:/app
