@@ -30,7 +30,7 @@ class TagSerializer(HyperlinkedModelSerializer):
 class StartupSerializer(HyperlinkedModelSerializer):
     """Serialize Startup data"""
 
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Startup
