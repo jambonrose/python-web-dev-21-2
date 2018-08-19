@@ -9,7 +9,7 @@ from config.test_utils import (
     reverse,
 )
 
-from ..models import Tag
+from ..models import Startup, Tag
 from ..serializers import (
     NewsLinkSerializer,
     StartupSerializer,
@@ -103,6 +103,17 @@ class StartupSerializerTests(TestCase):
         )
         self.assertTrue(
             s_startup.is_valid(), msg=s_startup.errors
+        )
+        self.assertEqual(
+            Startup.objects.count(),
+            0,
+            "Unexpected initial condition",
+        )
+        s_startup.save()
+        self.assertEqual(
+            Startup.objects.count(),
+            1,
+            "Serialized Startup not saved",
         )
 
     def test_invalid_deserialization(self):
