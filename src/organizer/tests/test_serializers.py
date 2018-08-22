@@ -125,12 +125,11 @@ class StartupSerializerTests(TestCase):
         )
         self.assertCountEqual(
             startup.tags.values_list("slug", flat=True),
-            Tag.objects.values_list("slug", flat=True),
+            [],
+            "Startup had tags associated with it",
         )
         self.assertEqual(
-            Tag.objects.count(),
-            5,
-            "Serialized Tags not saved",
+            Tag.objects.count(), 2, "Serialized Tags saved"
         )
 
     def test_invalid_deserialization(self):
