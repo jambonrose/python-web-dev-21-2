@@ -1,11 +1,14 @@
 """Tests for Organizer Views"""
 import json
+from functools import partial
 
 from test_plus import APITestCase
 
 from config.test_utils import (
     context_kwarg,
     get_instance_data,
+    lmap,
+    omit_keys,
     reverse,
 )
 
@@ -20,6 +23,14 @@ from .factories import (
     StartupFactory,
     TagFactory,
 )
+
+
+def get_tag_data(tag):
+    """Strip unchecked fields from Tag"""
+    return omit_keys("id", get_instance_data(tag))
+
+
+omit_url = partial(omit_keys, "url")
 
 
 class TagAPITests(APITestCase):
@@ -238,6 +249,71 @@ class StartupAPITests(APITestCase):
             "api-startup-detail", slug="nonexistent"
         )
         self.response_404()
+
+    def test_tags_get(self):
+        """Can we get the list of tags for a startup?"""
+        tags = TagFactory.create_batch(3)
+        startup = StartupFactory(tags=tags)
+        self.get_check_200(
+            "api-startup-tags", slug=startup.slug
+        )
+        self.assertCountEqual(
+            lmap(get_tag_data, tags),
+            lmap(omit_url, self.response_json),
+        )
+
+    def test_tags_post_single(self):
+        """Can we relate an existing tag to a Startup?"""
+        tags = TagFactory.create_batch(2)
+        startup = StartupFactory(tags=tags)
+        new_tag_data = get_tag_data(TagFactory())
+        self.post(
+            "api-startup-tags",
+            slug=startup.slug,
+            data=new_tag_data,
+        )
+        self.response_204()
+        startup.refresh_from_db()
+        related_tag_data = lmap(
+            get_tag_data, startup.tags.all()
+        )
+        self.assertEqual(len(related_tag_data), 3)
+        self.assertIn(new_tag_data, related_tag_data)
+
+    def test_tags_post_tag_not_found(self):
+        """Do we provide an error if the Tag doesn't exist?"""
+        tags = TagFactory.create_batch(2)
+        startup = StartupFactory(tags=tags)
+        unsaved_tag_data = get_tag_data(TagFactory.build())
+        self.post(
+            "api-startup-tags",
+            slug=startup.slug,
+            data=unsaved_tag_data,
+        )
+        self.response_404()
+
+    def test_tags_options(self):
+        """Can we see OPTIONS on the Startup's Tag action?"""
+        startup = StartupFactory()
+        self.options("api-startup-tags", slug=startup.slug)
+        self.response_200()
+
+    def test_tags_put_patch_delete(self):
+        """Do we disallow unsupported methods with 405 errors?"""
+        tags = TagFactory.create_batch(2)
+        startup = StartupFactory(tags=tags)
+        new_tag_data = get_tag_data(TagFactory())
+        url_kwargs = {
+            "url_name": "api-startup-tags",
+            "slug": startup.slug,
+            "data": new_tag_data,
+        }
+        self.put(**url_kwargs)
+        self.response_405()
+        self.patch(**url_kwargs)
+        self.response_405()
+        self.delete("api-startup-tags", slug=startup.slug)
+        self.response_405()
 
 
 class NewsLinkAPITests(APITestCase):
