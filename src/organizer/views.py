@@ -7,10 +7,7 @@ from rest_framework.generics import (
 )
 
 from .models import NewsLink, Startup, Tag
-from .serializers import (
-    NewsLinkSerializer,
-    StartupSerializer,
-)
+from .serializers import NewsLinkSerializer
 
 
 class TagList(ListView):
@@ -39,21 +36,6 @@ class StartupDetail(DetailView):
 
     queryset = Startup.objects.all()
     template_name = "startup/detail.html"
-
-
-class StartupAPIDetail(RetrieveAPIView):
-    """Return JSON for single Startup object"""
-
-    queryset = Startup.objects.all()
-    serializer_class = StartupSerializer
-    lookup_field = "slug"
-
-
-class StartupAPIList(ListAPIView):
-    """Return JSON for multiple Startup objects"""
-
-    queryset = Startup.objects.all()
-    serializer_class = StartupSerializer
 
 
 class NewsLinkAPIDetail(RetrieveAPIView):
