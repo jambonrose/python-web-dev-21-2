@@ -163,26 +163,24 @@ class NewsLinkSerializerTests(TestCase):
             200,
         )
         self.assertEqual(
-            s_nl.data["startup"]["slug"], nl.startup.slug
+            self.client.get(
+                s_nl.data["startup"]
+            ).status_code,
+            200,
         )
 
     def test_deserialization(self):
         """Can we deserialize data to a NewsLink model?"""
-        tag_dicts = lmap(
-            get_instance_data, TagFactory.build_batch(3)
-        )
-        startup_data = omit_keys(
-            "tags",
-            get_instance_data(StartupFactory.build()),
+        startup_url = reverse(
+            "api-startup-detail",
+            slug=StartupFactory().slug,
+            full=True,
         )
         nl_data = omit_keys(
             "startup",
             get_instance_data(NewsLinkFactory.build()),
         )
-        data = dict(
-            **nl_data,
-            startup=dict(**startup_data, tags=tag_dicts),
-        )
+        data = dict(**nl_data, startup=startup_url)
         s_nl = NewsLinkSerializer(
             data=data, **context_kwarg("/api/v1/newslink/")
         )
