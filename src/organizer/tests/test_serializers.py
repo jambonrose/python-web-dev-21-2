@@ -150,9 +150,17 @@ class NewsLinkSerializerTests(TestCase):
         s_nl = NewsLinkSerializer(
             nl, **context_kwarg(nl_url)
         )
+        self.assertNotIn("id", s_nl.data)
+        self.assertIn("url", s_nl.data)
         self.assertEqual(
-            omit_keys("startup", s_nl.data),
-            omit_keys("startup", get_instance_data(nl)),
+            omit_keys("url", "startup", s_nl.data),
+            omit_keys(
+                "id", "startup", get_instance_data(nl)
+            ),
+        )
+        self.assertEqual(
+            self.client.get(s_nl.data["url"]).status_code,
+            200,
         )
         self.assertEqual(
             s_nl.data["startup"]["slug"], nl.startup.slug
