@@ -5,9 +5,11 @@ http://www.django-rest-framework.org/api-guide/serializers/
 http://www.django-rest-framework.org/api-guide/fields/
 http://www.django-rest-framework.org/api-guide/relations/
 """
+from rest_framework.reverse import reverse
 from rest_framework.serializers import (
     HyperlinkedModelSerializer,
     ModelSerializer,
+    SerializerMethodField,
 )
 
 from .models import NewsLink, Startup, Tag
@@ -46,8 +48,20 @@ class StartupSerializer(HyperlinkedModelSerializer):
 class NewsLinkSerializer(ModelSerializer):
     """Serialize NewsLink data"""
 
+    url = SerializerMethodField()
     startup = StartupSerializer()
 
     class Meta:
         model = NewsLink
-        fields = "__all__"
+        exclude = ("id",)
+
+    def get_url(self, newslink):
+        """Build full URL for NewsLink API detail"""
+        return reverse(
+            "api-newslink-detail",
+            kwargs=dict(
+                startup_slug=newslink.startup.slug,
+                newslink_slug=newslink.slug,
+            ),
+            request=self.context["request"],
+        )
