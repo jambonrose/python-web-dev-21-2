@@ -8,6 +8,7 @@ http://www.django-rest-framework.org/api-guide/relations/
 from rest_framework.reverse import reverse
 from rest_framework.serializers import (
     HyperlinkedModelSerializer,
+    HyperlinkedRelatedField,
     ModelSerializer,
     SerializerMethodField,
 )
@@ -49,7 +50,11 @@ class NewsLinkSerializer(ModelSerializer):
     """Serialize NewsLink data"""
 
     url = SerializerMethodField()
-    startup = StartupSerializer()
+    startup = HyperlinkedRelatedField(
+        queryset=Startup.objects.all(),
+        lookup_field="slug",
+        view_name="api-startup-detail",
+    )
 
     class Meta:
         model = NewsLink
