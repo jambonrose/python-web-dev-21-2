@@ -10,3 +10,8 @@ TEMPLATES[0]["OPTIONS"].update(  # noqa: F405
         )
     }
 )
+
+# https://github.com/evansd/whitenoise/issues/191
+# Normally set to settings.DEBUG, but tests run with DEBUG=FALSE!
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_USE_FINDERS = True
