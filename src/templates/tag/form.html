@@ -1,0 +1,18 @@
+{% extends parent_template|default:"tag/base.html" %}
+
+{% block title %}
+  {{ block.super }} - {% if update %}Update{% else %}Create{% endif %} Tag
+{% endblock %}
+
+{% block content %}
+  <form
+      action="."
+      method="post"
+  >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">
+      {% if update %}Update{% else %}Create{% endif %} Tag
+    </button>
+  </form>
+{% endblock %}
