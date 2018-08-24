@@ -13,7 +13,7 @@ class TagFormTests(TestCase):
         self.assertFalse(
             Tag.objects.filter(name="django").exists()
         )
-        bounded_form = TagForm(data=dict(name="django"))
+        bounded_form = TagForm(data=dict(name="Django"))
         self.assertTrue(
             bounded_form.is_valid(), bounded_form.errors
         )
@@ -21,3 +21,10 @@ class TagFormTests(TestCase):
         self.assertTrue(
             Tag.objects.filter(name="django").exists()
         )
+
+    def test_slug_validation(self):
+        """Do we error if slug is create?"""
+        tform = TagForm(
+            data=dict(name="django", slug="create")
+        )
+        self.assertFalse(tform.is_valid())
