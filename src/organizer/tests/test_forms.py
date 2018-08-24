@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from ..forms import TagForm
 from ..models import Tag
+from .factories import TagFactory
 
 
 class TagFormTests(TestCase):
@@ -29,3 +30,15 @@ class TagFormTests(TestCase):
     #         data=dict(name="django", slug="create")
     #     )
     #     self.assertFalse(tform.is_valid())
+
+    def test_update(self):
+        """Can we save new tags based on input?"""
+        tag = TagFactory()
+        self.assertNotEqual(tag.name, "django")
+        tform = TagForm(
+            data=dict(name="Django"), instance=tag
+        )
+        self.assertTrue(tform.is_valid(), tform.errors)
+        tform.save()
+        tag.refresh_from_db()
+        self.assertEqual(tag.name, "django")
