@@ -14,6 +14,23 @@
         to improve your experience and security.
       </p>
     <![endif]-->
+    <nav>
+      <ul>
+        <li><a href="{% url 'post_list' %}">Blog</a></li>
+        <li><a href="{% url 'startup_list' %}">Startups</a></li>
+        <li><a href="{% url 'tag_list' %}">Tags</a></li>
+        <li><a href="{% url 'api-root' %}">Browse API</a></li>
+      </ul>
+    </nav>
     {% block content %}{% endblock %}
+    <footer>
+      <p>
+        Built by
+        <a href="https://andrewsforge.com">Andrew Pinkham</a>
+        under the
+        <a href="https://opensource.org/licenses/BSD-2-Clause">
+          Simplified BSD License</a>.
+      </p>
+    <footer>
   </body>
 </html>
