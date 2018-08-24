@@ -4,7 +4,8 @@ import sys
 
 if __name__ == "__main__":
     os.environ.setdefault(
-        "DJANGO_SETTINGS_MODULE", "config.settings"
+        "DJANGO_SETTINGS_MODULE",
+        "config.settings.development",
     )
     try:
         from django.core.management import (

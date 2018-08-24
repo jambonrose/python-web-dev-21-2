@@ -11,7 +11,7 @@ from environ import Env, Path
 
 ENV = Env()
 
-BASE_DIR = Path(__file__) - 2
+BASE_DIR = Path(__file__) - 3
 
 SECRET_KEY = ENV.str("SECRET_KEY")
 
