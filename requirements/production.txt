@@ -1,0 +1,4 @@
+-r base.txt
+
+gunicorn==19.7.1
+psycopg2>=2.7,<2.8 --no-binary psycopg2
