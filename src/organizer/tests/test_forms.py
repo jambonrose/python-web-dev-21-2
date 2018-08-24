@@ -22,9 +22,10 @@ class TagFormTests(TestCase):
             Tag.objects.filter(name="django").exists()
         )
 
-    def test_slug_validation(self):
-        """Do we error if slug is create?"""
-        tform = TagForm(
-            data=dict(name="django", slug="create")
-        )
-        self.assertFalse(tform.is_valid())
+    # AutoSlugField does not have a field in ModelForms!
+    # def test_slug_validation(self):
+    #     """Do we error if slug is create?"""
+    #     tform = TagForm(
+    #         data=dict(name="django", slug="create")
+    #     )
+    #     self.assertFalse(tform.is_valid())
