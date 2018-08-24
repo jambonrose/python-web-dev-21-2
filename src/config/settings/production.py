@@ -11,6 +11,8 @@ ADMINS = MANAGERS = [
     # ('Your Name', 'name@email.com'),
 ]
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 #####################
 # SECURITY SETTINGS #
 #####################
