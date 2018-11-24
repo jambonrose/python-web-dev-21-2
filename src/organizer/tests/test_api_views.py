@@ -3,9 +3,13 @@ import json
 
 from test_plus import APITestCase
 
-from config.test_utils import context_kwarg, reverse
+from config.test_utils import (
+    context_kwarg,
+    get_instance_data,
+    reverse,
+)
 
-from ..models import Tag
+from ..models import Startup, Tag
 from ..serializers import (
     NewsLinkSerializer,
     StartupSerializer,
@@ -143,6 +147,16 @@ class StartupAPITests(APITestCase):
         self.get_check_200("api-startup-list")
         self.assertEquals(self.response_json, [])
 
+    def test_list_create(self):
+        """Does Startup list view create new objects via POST?"""
+        self.assertEqual(Startup.objects.count(), 0)
+        self.post(
+            "api-startup-list",
+            data=get_instance_data(StartupFactory.build()),
+        )
+        self.response_201()
+        self.assertEqual(Startup.objects.count(), 1)
+
     def test_detail(self):
         """Is there a detail view for a Startup object"""
         startup = StartupFactory()
@@ -160,6 +174,69 @@ class StartupAPITests(APITestCase):
     def test_detail_404(self):
         """Do we generate 404 if startup not found?"""
         self.get("api-startup-detail", pk=1)
+        self.response_404()
+
+    def test_detail_update(self):
+        """Can we update a Startup via PUT?"""
+        startup = StartupFactory(name="first")
+        url = reverse(
+            "api-startup-detail", slug=startup.slug
+        )
+        self.put(
+            url,
+            data={
+                **get_instance_data(startup),
+                "name": "second",
+            },
+        )
+        self.response_200()
+        startup.refresh_from_db()
+        self.assertEqual(startup.name, "second")
+
+    def test_detail_update_404(self):
+        """Do we generate 404 if startup not found?"""
+        url = reverse(
+            "api-startup-detail", slug="nonexistent"
+        )
+        self.put(
+            url,
+            data=get_instance_data(StartupFactory.build()),
+        )
+        self.response_404()
+
+    def test_detail_partial_update(self):
+        """Can we update a Startup via PATCH?"""
+        startup = StartupFactory(name="first")
+        url = reverse(
+            "api-startup-detail", slug=startup.slug
+        )
+        self.patch(url, data={"name": "second"})
+        self.response_200()
+        startup.refresh_from_db()
+        self.assertEqual(startup.name, "second")
+
+    def test_detail_partial_update_404(self):
+        """Do we generate 404 if startup not found?"""
+        url = reverse(
+            "api-startup-detail", slug="nonexistent"
+        )
+        self.patch(url, data={"name": "second"})
+        self.response_404()
+
+    def test_detail_delete(self):
+        """Can we delete a startup?"""
+        startup = StartupFactory()
+        self.delete("api-startup-detail", slug=startup.slug)
+        self.response_204()
+        self.assertFalse(
+            Startup.objects.filter(pk=startup.pk).exists()
+        )
+
+    def test_detail_delete_404(self):
+        """Do we generate 404 if startup not found?"""
+        self.delete(
+            "api-startup-detail", slug="nonexistent"
+        )
         self.response_404()
 
 
