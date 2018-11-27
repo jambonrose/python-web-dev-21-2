@@ -33,7 +33,12 @@ class TagSerializer(HyperlinkedModelSerializer):
 class StartupSerializer(HyperlinkedModelSerializer):
     """Serialize Startup data"""
 
-    tags = TagSerializer(many=True, read_only=True)
+    tags = HyperlinkedRelatedField(
+        lookup_field="slug",
+        many=True,
+        read_only=True,
+        view_name="api-tag-detail",
+    )
 
     class Meta:
         model = Startup
