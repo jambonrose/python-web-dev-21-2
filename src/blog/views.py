@@ -6,6 +6,11 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
 )
+from rest_framework.response import Response
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+)
 
 from .models import Post
 from .serializers import PostSerializer
@@ -39,6 +44,20 @@ class PostAPIList(ListAPIView):
 
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def post(self, request):
+        """Create new Post upon POST"""
+        s_post = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        if s_post.is_valid():
+            s_post.save()
+            return Response(
+                s_post.data, status=HTTP_201_CREATED
+            )
+        return Response(
+            s_post.errors, status=HTTP_400_BAD_REQUEST
+        )
 
 
 class PostAPIDetail(RetrieveAPIView):
