@@ -43,7 +43,7 @@ class PostSerializerTests(TestCase):
         s_post = PostSerializer(post, **post_ctxt)
         self.assertEqual(
             remove_m2m("url", s_post.data),
-            remove_m2m(get_instance_data(post)),
+            remove_m2m("id", get_instance_data(post)),
         )
         self.assertEqual(
             s_post.data["url"],
