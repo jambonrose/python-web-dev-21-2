@@ -8,14 +8,12 @@ http://www.django-rest-framework.org/api-guide/relations/
 
 from rest_framework.reverse import reverse
 from rest_framework.serializers import (
+    HyperlinkedRelatedField,
     ModelSerializer,
     SerializerMethodField,
 )
 
-from organizer.serializers import (
-    StartupSerializer,
-    TagSerializer,
-)
+from organizer.models import Startup, Tag
 
 from .models import Post
 
@@ -24,8 +22,18 @@ class PostSerializer(ModelSerializer):
     """Serialize Post data"""
 
     url = SerializerMethodField()
-    tags = TagSerializer(many=True)
-    startups = StartupSerializer(many=True)
+    tags = HyperlinkedRelatedField(
+        lookup_field="slug",
+        many=True,
+        queryset=Tag.objects.all(),
+        view_name="api-tag-detail",
+    )
+    startups = HyperlinkedRelatedField(
+        lookup_field="slug",
+        many=True,
+        queryset=Startup.objects.all(),
+        view_name="api-startup-detail",
+    )
 
     class Meta:
         model = Post
