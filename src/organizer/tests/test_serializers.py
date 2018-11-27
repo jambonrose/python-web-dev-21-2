@@ -4,7 +4,6 @@ from django.test import TestCase
 from config.test_utils import (
     context_kwarg,
     get_instance_data,
-    lmap,
     omit_keys,
     reverse,
 )
@@ -79,13 +78,14 @@ class StartupSerializerTests(TestCase):
                 "id", "tags", get_instance_data(startup)
             ),
         )
+        tag_urls = [
+            reverse(
+                "api-tag-detail", slug=tag.slug, full=True
+            )
+            for tag in tag_list
+        ]
         self.assertCountEqual(
-            s_startup.data["tags"],
-            TagSerializer(
-                tag_list,
-                many=True,
-                **context_kwarg(startup_url),
-            ).data,
+            s_startup.data["tags"], tag_urls
         )
         self.assertEqual(s_startup.data["url"], startup_url)
 
@@ -94,13 +94,12 @@ class StartupSerializerTests(TestCase):
         startup_data = get_instance_data(
             StartupFactory.build()
         )
-        tag_dicts = lmap(
-            get_instance_data, TagFactory.build_batch(3)
-        )
-        tag_dicts += lmap(
-            get_instance_data, TagFactory.create_batch(2)
-        )
-        data = dict(startup_data, tags=tag_dicts)
+        tag_urls = [
+            reverse("api-tag-detail", slug=tag.slug)
+            for tag in TagFactory.build_batch(3)
+            + TagFactory.create_batch(2)
+        ]
+        data = dict(startup_data, tags=tag_urls)
         s_startup = StartupSerializer(
             data=data, **context_kwarg("/api/v1/startup/")
         )
