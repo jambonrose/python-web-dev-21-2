@@ -119,3 +119,50 @@ class PostAPITests(APITestCase):
             slug="now-recording",
         )
         self.response_404()
+
+    def test_detail_update(self):
+        """Can we update a Post via PUT?"""
+        post = PostFactory(title="first")
+        count = Post.objects.count()
+        tag_list = TagFactory.create_batch(randint(1, 10))
+        tag_urls = [
+            reverse("api-tag-detail", slug=tag.slug)
+            for tag in tag_list
+        ]
+        startup_list = StartupFactory.create_batch(
+            randint(1, 10)
+        )
+        startup_urls = [
+            reverse("api-startup-detail", slug=startup.slug)
+            for startup in startup_list
+        ]
+        self.put(
+            "api-post-detail",
+            year=post.pub_date.year,
+            month=post.pub_date.month,
+            slug=post.slug,
+            data=dict(
+                remove_m2m(get_instance_data(post)),
+                title="second",
+                tags=tag_urls,
+                startups=startup_urls,
+            ),
+        )
+        self.response_200()
+        self.assertEqual(count, Post.objects.count())
+        post.refresh_from_db()
+        self.assertEqual("second", post.title)
+        self.assertCountEqual(tag_list, post.tags.all())
+        self.assertCountEqual(
+            startup_list, post.startups.all()
+        )
+
+    def test_detail_update_404(self):
+        """Do we generate 404 if post not found?"""
+        self.put(
+            "api-post-detail",
+            year=2018,
+            month=11,
+            slug="post-recording",
+        )
+        self.response_404()
