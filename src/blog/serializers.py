@@ -29,7 +29,7 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = "__all__"
+        exclude = ("id",)
 
     def get_url(self, post):
         """Return full API URL for serialized POST object"""
