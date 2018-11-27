@@ -8,6 +8,7 @@ from config.test_utils import (
     get_instance_data,
     lmap,
     omit_keys,
+    reverse,
 )
 from organizer.serializers import (
     StartupSerializer,
@@ -41,8 +42,18 @@ class PostSerializerTests(TestCase):
         )
         s_post = PostSerializer(post, **post_ctxt)
         self.assertEqual(
-            remove_m2m(s_post.data),
+            remove_m2m("url", s_post.data),
             remove_m2m(get_instance_data(post)),
+        )
+        self.assertEqual(
+            s_post.data["url"],
+            reverse(
+                "api-post-detail",
+                year=post.pub_date.year,
+                month=post.pub_date.month,
+                slug=post.slug,
+                full=True,
+            ),
         )
         self.assertCountEqual(
             s_post.data["tags"],
