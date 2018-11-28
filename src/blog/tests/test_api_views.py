@@ -229,3 +229,27 @@ class PostAPITests(APITestCase):
             slug="post-recording",
         )
         self.response_404()
+
+    def test_detail_delete(self):
+        """Can we delete a post?"""
+        post = PostFactory()
+        self.delete(
+            "api-post-detail",
+            year=post.pub_date.year,
+            month=post.pub_date.month,
+            slug=post.slug,
+        )
+        self.response_204()
+        self.assertFalse(
+            Post.objects.filter(pk=post.pk).exists()
+        )
+
+    def test_detail_delete_404(self):
+        """Do we generate 404 if post not found?"""
+        self.delete(
+            "api-post-detail",
+            year=2018,
+            month=11,
+            slug="nonexistent",
+        )
+        self.response_404()
