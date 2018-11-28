@@ -109,3 +109,27 @@ class PostAPIDetail(RetrieveAPIView):
         return Response(
             s_post.errors, status=HTTP_400_BAD_REQUEST
         )
+
+    def patch(self, request, *args, **kwargs):
+        """Update Post object with new data from PATCH
+
+        Type signature could also be:
+            def patch(self, request, year, month, slug)
+
+        Given that we don't use any of the key-word
+        arguments, we simplify the signature with Python's
+        args/kwargs signature.
+        """
+        post = self.get_object()
+        s_post = self.serializer_class(
+            post,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        if s_post.is_valid():
+            s_post.save()
+            return Response(s_post.data, status=HTTP_200_OK)
+        return Response(
+            s_post.errors, status=HTTP_400_BAD_REQUEST
+        )
