@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
 )
 
@@ -133,3 +134,17 @@ class PostAPIDetail(RetrieveAPIView):
         return Response(
             s_post.errors, status=HTTP_400_BAD_REQUEST
         )
+
+    def delete(self, request, *args, **kwargs):
+        """DELETE the Post
+
+        Type signature could also be:
+            def delete(self, request, year, month, slug)
+
+        Given that we don't use any of the key-word
+        arguments, we simplify the signature with Python's
+        args/kwargs signature.
+        """
+        post = self.get_object()
+        post.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
