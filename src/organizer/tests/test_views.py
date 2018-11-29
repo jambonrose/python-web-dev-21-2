@@ -302,3 +302,32 @@ class StartupViewTests(TestCase):
         self.assertRedirects(
             response, startup.get_absolute_url()
         )
+
+    def test_delete_get(self):
+        """Can we view a form to delete a Startup?"""
+        startup = StartupFactory()
+        response = self.get_check_200(
+            "startup_delete", slug=startup.slug
+        )
+        context_startup = self.get_context("startup")
+        self.assertEqual(startup.pk, context_startup.pk)
+        self.assertTemplateUsed(
+            response, "startup/confirm_delete.html"
+        )
+        self.assertTemplateUsed(
+            response, "startup/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_delete_post(self):
+        """Can we submit a form to delete a Startup?"""
+        startup = StartupFactory()
+        response = self.post(
+            "startup_delete", slug=startup.slug
+        )
+        self.assertRedirects(
+            response, reverse("startup_list")
+        )
+        self.assertFalse(
+            Startup.objects.filter(pk=startup.pk).exists()
+        )
