@@ -1,0 +1,21 @@
+{% extends parent_template|default:"startup/base.html" %}
+
+{% block title %}
+  {{ startup.name }}: delete?
+{% endblock %}
+
+{% block content %}
+  <form
+      action="."
+      method="post"
+  >
+    {% csrf_token %}
+    <p>
+      Are you sure you want to delete startup {{ startup.name }}?
+    </p>
+    <a href="{{ startup.get_absolute_url }}">
+      Cancel
+    </a>
+    <button type="submit">Delete Startup</button>
+  </form>
+{% endblock %}

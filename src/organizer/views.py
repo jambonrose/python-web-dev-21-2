@@ -61,6 +61,14 @@ class StartupCreate(CreateView):
     extra_context = {"update": False}
 
 
+class StartupDelete(DeleteView):
+    """Confirm and delete a Startup via HTML Form"""
+
+    model = Startup
+    template_name = "startup/confirm_delete.html"
+    success_url = reverse_lazy("startup_list")
+
+
 class StartupList(ListView):
     """Display a list of Startups"""
 
