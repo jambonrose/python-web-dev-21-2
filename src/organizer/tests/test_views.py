@@ -1,4 +1,6 @@
 """Tests for (traditional/HTML) views for Organizer App"""
+from random import randint
+
 from django.utils.text import slugify
 from test_plus import TestCase
 
@@ -254,6 +256,49 @@ class StartupViewTests(TestCase):
             slug=startup_data["slug"]
         )
         self.assertIn(tag, startup.tags.all())
+        self.assertRedirects(
+            response, startup.get_absolute_url()
+        )
+
+    def test_update_get(self):
+        """Can we view a form to update startups?"""
+        startup = StartupFactory()
+        response = self.get_check_200(
+            "startup_update", slug=startup.slug
+        )
+        form = self.get_context("form")
+        self.assertIsInstance(form, StartupForm)
+        context_startup = self.get_context("startup")
+        self.assertEqual(startup.pk, context_startup.pk)
+        self.assertContext("update", True)
+        self.assertTemplateUsed(
+            response, "startup/form.html"
+        )
+        self.assertTemplateUsed(
+            response, "startup/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_update_post(self):
+        """Can we submit a form to update startups?"""
+        startup = StartupFactory(
+            tags=TagFactory.create_batch(randint(1, 5))
+        )
+        self.assertNotEqual(startup.name, "django")
+        startup_data = omit_keys(
+            "id", get_instance_data(startup)
+        )
+        response = self.post(
+            "startup_update",
+            slug=startup.slug,
+            data=dict(startup_data, name="django"),
+        )
+        startup.refresh_from_db()
+        self.assertEqual(
+            startup.name,
+            "django",
+            response.content.decode("utf8"),
+        )
         self.assertRedirects(
             response, startup.get_absolute_url()
         )
