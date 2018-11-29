@@ -12,7 +12,7 @@ from config.test_utils import (
     reverse,
 )
 
-from ..models import Startup, Tag
+from ..models import NewsLink, Startup, Tag
 from ..serializers import (
     NewsLinkSerializer,
     StartupSerializer,
@@ -345,6 +345,31 @@ class NewsLinkAPITests(APITestCase):
         self.get_check_200("api-newslink-list")
         self.assertEquals(self.response_json, [])
 
+    def test_list_create(self):
+        """Can articles be created by POST?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory.build()
+        nl_num = NewsLink.objects.count()
+        self.post(
+            "api-newslink-list",
+            data={
+                **get_instance_data(newslink),
+                "startup": reverse(
+                    "api-startup-detail",
+                    slug=startup.slug,
+                    full=True,
+                ),
+            },
+        )
+        self.assertEqual(
+            nl_num + 1, NewsLink.objects.count()
+        )
+        self.assertTrue(
+            NewsLink.objects.filter(
+                slug=newslink.slug, startup=startup
+            ).exists()
+        )
+
     def test_detail(self):
         """Is there a detail view for a NewsLink object"""
         newslink = NewsLinkFactory()
@@ -367,5 +392,83 @@ class NewsLinkAPITests(APITestCase):
             "api-newslink-detail",
             startup_slug="django",
             newslink_slug="the-best",
+        )
+        self.response_404()
+
+    def test_detail_update(self):
+        """Can we update an article via PUT?"""
+        newslink = NewsLinkFactory(title="first")
+        self.put(
+            "api-newslink-detail",
+            startup_slug=newslink.startup.slug,
+            newslink_slug=newslink.slug,
+            data={
+                **get_instance_data(newslink),
+                "title": "second",
+                "startup": reverse(
+                    "api-startup-detail",
+                    slug=newslink.startup.slug,
+                    full=True,
+                ),
+            },
+        )
+        self.response_200()
+        newslink.refresh_from_db()
+        self.assertEqual(newslink.title, "second")
+
+    def test_detail_update_404(self):
+        """Do we generate 404 if newslink not found?"""
+        self.put(
+            "api-newslink-detail",
+            startup_slug="django",
+            newslink_slug="the-best",
+            data={"title": "second"},
+        )
+        self.response_404()
+
+    def test_detail_partial_update(self):
+        """Can we update an article via PATCH?"""
+        newslink = NewsLinkFactory(title="first")
+        self.patch(
+            "api-newslink-detail",
+            startup_slug=newslink.startup.slug,
+            newslink_slug=newslink.slug,
+            data={"title": "second"},
+        )
+        self.response_200()
+        newslink.refresh_from_db()
+        self.assertEqual(newslink.title, "second")
+
+    def test_detail_partial_update_404(self):
+        """Do we generate 404 if article not found?"""
+        self.patch(
+            "api-newslink-detail",
+            startup_slug="django",
+            newslink_slug="the-best",
+            data={"title": "second"},
+        )
+        self.response_404()
+
+    def test_detail_delete(self):
+        """Can we delete an article?"""
+        newslink = NewsLinkFactory()
+        self.delete(
+            "api-newslink-detail",
+            startup_slug=newslink.startup.slug,
+            newslink_slug=newslink.slug,
+            data={"title": "second"},
+        )
+        self.response_204()
+        self.assertFalse(
+            NewsLink.objects.filter(pk=newslink.pk).exists()
+        )
+
+    def test_detail_delete_404(self):
+        """Do we generate 404 if startup not found?"""
+        self.delete(
+            "api-newslink-detail",
+            startup_slug="django",
+            newslink_slug="the-best",
+            data={"title": "second"},
         )
         self.response_404()
