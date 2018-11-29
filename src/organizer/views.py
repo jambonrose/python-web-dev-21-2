@@ -73,3 +73,12 @@ class StartupDetail(DetailView):
 
     queryset = Startup.objects.all()
     template_name = "startup/detail.html"
+
+
+class StartupUpdate(UpdateView):
+    """Update a Startup via HTML form"""
+
+    form_class = StartupForm
+    model = Startup
+    template_name = "startup/form.html"
+    extra_context = {"update": True}
