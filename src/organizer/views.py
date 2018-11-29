@@ -8,7 +8,7 @@ from django.views.generic import (
     UpdateView,
 )
 
-from .forms import TagForm
+from .forms import StartupForm, TagForm
 from .models import Startup, Tag
 
 
@@ -50,6 +50,15 @@ class TagDelete(DeleteView):
     model = Tag
     template_name = "tag/confirm_delete.html"
     success_url = reverse_lazy("tag_list")
+
+
+class StartupCreate(CreateView):
+    """Create new Startups via HTML form"""
+
+    form_class = StartupForm
+    model = Startup
+    template_name = "startup/form.html"
+    extra_context = {"update": False}
 
 
 class StartupList(ListView):
