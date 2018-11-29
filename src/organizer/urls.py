@@ -5,6 +5,7 @@ from .views import (
     StartupCreate,
     StartupDetail,
     StartupList,
+    StartupUpdate,
     TagCreate,
     TagDelete,
     TagDetail,
@@ -27,6 +28,11 @@ urlpatterns = [
         "startup/<str:slug>/",
         StartupDetail.as_view(),
         name="startup_detail",
+    ),
+    path(
+        "startup/<str:slug>/update/",
+        StartupUpdate.as_view(),
+        name="startup_update",
     ),
     path("tag/", TagList.as_view(), name="tag_list"),
     path(
