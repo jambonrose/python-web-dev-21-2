@@ -2,6 +2,7 @@
 from django.urls import path
 
 from .views import (
+    StartupCreate,
     StartupDetail,
     StartupList,
     TagCreate,
@@ -16,6 +17,11 @@ urlpatterns = [
         "startup/",
         StartupList.as_view(),
         name="startup_list",
+    ),
+    path(
+        "startup/create/",
+        StartupCreate.as_view(),
+        name="startup_create",
     ),
     path(
         "startup/<str:slug>/",
