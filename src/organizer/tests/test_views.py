@@ -8,8 +8,8 @@ from config.test_utils import (
     reverse,
 )
 
-from ..forms import TagForm
-from ..models import Tag
+from ..forms import StartupForm, TagForm
+from ..models import Startup, Tag
 from .factories import StartupFactory, TagFactory
 
 
@@ -216,3 +216,44 @@ class StartupViewTests(TestCase):
         """Do we return 404 for missing Startups?"""
         self.get("startup_detail", slug="nonexistent")
         self.response_404()
+
+    def test_create_get(self):
+        """Can we view the form to create Startups?"""
+        response = self.get_check_200("startup_create")
+        form = self.get_context("form")
+        self.assertIsInstance(form, StartupForm)
+        self.assertContext("update", False)
+        self.assertTemplateUsed(
+            response, "startup/form.html"
+        )
+        self.assertTemplateUsed(
+            response, "startup/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_create_post(self):
+        """Can we submit a form to create Startups?"""
+        startup_num = Startup.objects.count()
+        tag = TagFactory()
+        startup_data = {
+            **omit_keys(
+                "id",
+                get_instance_data(StartupFactory.build()),
+            ),
+            "tags": [tag.pk],
+        }
+        response = self.post(
+            "startup_create", data=startup_data
+        )
+        self.assertEqual(
+            Startup.objects.count(),
+            startup_num + 1,
+            response.content.decode("utf8"),
+        )
+        startup = Startup.objects.get(
+            slug=startup_data["slug"]
+        )
+        self.assertIn(tag, startup.tags.all())
+        self.assertRedirects(
+            response, startup.get_absolute_url()
+        )
