@@ -2,8 +2,8 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 from rest_framework.generics import (
-    ListAPIView,
-    RetrieveAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
 )
 
 from .models import NewsLink, Startup, Tag
@@ -38,7 +38,7 @@ class StartupDetail(DetailView):
     template_name = "startup/detail.html"
 
 
-class NewsLinkAPIDetail(RetrieveAPIView):
+class NewsLinkAPIDetail(RetrieveUpdateDestroyAPIView):
     """Return JSON for single NewsLink object"""
 
     queryset = NewsLink.objects.all()
@@ -65,7 +65,7 @@ class NewsLinkAPIDetail(RetrieveAPIView):
         return newslink
 
 
-class NewsLinkAPIList(ListAPIView):
+class NewsLinkAPIList(ListCreateAPIView):
     """Return JSON for multiple NewsLink objects"""
 
     queryset = NewsLink.objects.all()
