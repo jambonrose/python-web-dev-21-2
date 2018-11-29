@@ -1,0 +1,21 @@
+{% extends parent_template|default:"post/base.html" %}
+
+{% block title %}
+  {{ post.name }}: delete?
+{% endblock %}
+
+{% block content %}
+  <form
+      action="."
+      method="post"
+  >
+    {% csrf_token %}
+    <p>
+      Are you sure you want to delete blog post {{ post.name }}?
+    </p>
+    <a href="{{ post.get_absolute_url }}">
+      Cancel
+    </a>
+    <button type="submit">Delete Blog Post</button>
+  </form>
+{% endblock %}
