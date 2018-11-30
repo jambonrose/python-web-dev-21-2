@@ -108,3 +108,10 @@ class NewsLink(Model):
 
     def __str__(self):
         return f"{self.startup}: {self.title}"
+
+    def get_absolute_url(self):
+        """Return URL to detail page of Startup"""
+        return reverse(
+            "startup_detail",
+            kwargs={"slug": self.startup.slug},
+        )
