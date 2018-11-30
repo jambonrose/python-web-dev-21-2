@@ -1,0 +1,19 @@
+{% extends parent_template|default:"newslink/base.html" %}
+
+{% block title %}
+  {{ block.super }} - {% if update %}Update{% else %}Create{% endif %} Article Link
+{% endblock %}
+
+{% block content %}
+  Link to new article for startup {{ startup.name }}?
+  <form
+      action="."
+      method="post"
+  >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">
+      {% if update %}Update{% else %}Create{% endif %} link to article
+    </button>
+  </form>
+{% endblock %}
