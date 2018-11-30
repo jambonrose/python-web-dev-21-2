@@ -3,9 +3,13 @@ from django.test import TestCase
 
 from config.test_utils import get_instance_data, omit_keys
 
-from ..forms import StartupForm, TagForm
-from ..models import Startup, Tag
-from .factories import StartupFactory, TagFactory
+from ..forms import NewsLinkForm, StartupForm, TagForm
+from ..models import NewsLink, Startup, Tag
+from .factories import (
+    NewsLinkFactory,
+    StartupFactory,
+    TagFactory,
+)
 
 
 class TagFormTests(TestCase):
@@ -102,3 +106,52 @@ class StartupFormTests(TestCase):
         sform.save()
         startup.refresh_from_db()
         self.assertEqual(startup.name, "django")
+
+
+class NewsLinkFormTests(TestCase):
+    """Tests for NewsLinkForm"""
+
+    def test_creation(self):
+        """Can we save new newslinks based on input?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory.build()
+        self.assertFalse(
+            NewsLink.objects.filter(
+                slug=newslink.slug
+            ).exists()
+        )
+        bounded_form = NewsLinkForm(
+            data={
+                **get_instance_data(newslink),
+                "startup": startup.pk,
+            }
+        )
+        self.assertTrue(
+            bounded_form.is_valid(), bounded_form.errors
+        )
+        bounded_form.save()
+        self.assertTrue(
+            NewsLink.objects.filter(
+                slug=newslink.slug
+            ).exists()
+        )
+
+    def test_update(self):
+        """Can we updated newslinks based on input?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        self.assertNotEqual(newslink.title, "django")
+        nl_form = NewsLinkForm(
+            instance=newslink,
+            data=dict(
+                omit_keys(
+                    "name", get_instance_data(newslink)
+                ),
+                title="django",
+                startups=[startup.pk],
+            ),
+        )
+        self.assertTrue(nl_form.is_valid(), nl_form.errors)
+        nl_form.save()
+        newslink.refresh_from_db()
+        self.assertEqual(newslink.title, "django")
