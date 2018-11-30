@@ -155,3 +155,20 @@ class NewsLinkFormTests(TestCase):
         nl_form.save()
         newslink.refresh_from_db()
         self.assertEqual(newslink.title, "django")
+
+    def test_slug_validation(self):
+        """Do we error if slug conflicts with URL?"""
+        conflicts = ["delete", "update", "add_article"]
+        startup = StartupFactory()
+        for url_path in conflicts:
+            with self.subTest(slug=url_path):
+                nl_form = NewsLinkForm(
+                    dict(
+                        get_instance_data(
+                            NewsLinkFactory.build()
+                        ),
+                        slug=url_path,
+                        startup=startup.pk,
+                    )
+                )
+                self.assertFalse(nl_form.is_valid())
