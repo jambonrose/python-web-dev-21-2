@@ -2,7 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 
-from .models import Startup, Tag
+from .models import NewsLink, Startup, Tag
 
 
 class LowercaseNameMixin:
@@ -48,4 +48,12 @@ class StartupForm(
 
     class Meta:
         model = Startup
+        fields = "__all__"
+
+
+class NewsLinkForm(ModelForm):
+    """HTML form for NewsLink objects"""
+
+    class Meta:
+        model = NewsLink
         fields = "__all__"
