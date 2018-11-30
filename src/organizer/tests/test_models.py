@@ -282,6 +282,16 @@ class NewsLinkModelTests(TestCase):
             str(nl), "JamBon: consult and teach!"
         )
 
+    def test_absolute_url(self):
+        """Do NewsLinks link to the Startup parent page?"""
+        newslink = NewsLinkFactory()
+        self.assertEqual(
+            newslink.get_absolute_url(),
+            reverse(
+                "startup_detail", slug=newslink.startup.slug
+            ),
+        )
+
     def test_uniqueness(self):
         """Are articles for a startup unique by slug?"""
         s = StartupFactory(name="JamBon")
