@@ -57,3 +57,12 @@ class NewsLinkForm(ModelForm):
     class Meta:
         model = NewsLink
         fields = "__all__"
+
+    def clean_slug(self):
+        """Avoid URI conflicts with paths in app"""
+        slug = self.cleaned_data["slug"]
+        if slug in ["delete", "update", "add_article"]:
+            raise ValidationError(
+                f"Slug may not be '{slug}'."
+            )
+        return slug
