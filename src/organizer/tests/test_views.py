@@ -10,9 +10,13 @@ from config.test_utils import (
     reverse,
 )
 
-from ..forms import StartupForm, TagForm
-from ..models import Startup, Tag
-from .factories import StartupFactory, TagFactory
+from ..forms import NewsLinkForm, StartupForm, TagForm
+from ..models import NewsLink, Startup, Tag
+from .factories import (
+    NewsLinkFactory,
+    StartupFactory,
+    TagFactory,
+)
 
 
 class TagViewTests(TestCase):
@@ -330,4 +334,154 @@ class StartupViewTests(TestCase):
         )
         self.assertFalse(
             Startup.objects.filter(pk=startup.pk).exists()
+        )
+
+
+class NewsLinkViewTests(TestCase):
+    """Tests for views that return NewsLinks in HTML"""
+
+    def test_startup_redirect(self):
+        """Does URI with both slugs redirect to Startup page?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        response = self.get(
+            "newslink_detail",
+            startup_slug=startup.slug,
+            newslink_slug=newslink.slug,
+        )
+        self.assertRedirects(
+            response, startup.get_absolute_url()
+        )
+
+    def test_create_get(self):
+        """Can we view the form to create NewsLinks?"""
+        startup = StartupFactory()
+        response = self.get_check_200(
+            "newslink_create", startup_slug=startup.slug
+        )
+        form = self.get_context("form")
+        self.assertIsInstance(form, NewsLinkForm)
+        context_startup = self.get_context("startup")
+        self.assertEqual(startup.pk, context_startup.pk)
+        self.assertContext("update", False)
+        self.assertTemplateUsed(
+            response, "newslink/form.html"
+        )
+        self.assertTemplateUsed(
+            response, "newslink/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_create_post(self):
+        """Can we submit a form to create NewsLinks?"""
+        newslink_num = NewsLink.objects.count()
+        startup = StartupFactory()
+        newslink_data = {
+            **omit_keys(
+                "id",
+                get_instance_data(NewsLinkFactory.build()),
+            ),
+            "startup": startup.pk,
+        }
+        response = self.post(
+            "newslink_create",
+            startup_slug=startup.slug,
+            data=newslink_data,
+        )
+        self.assertEqual(
+            NewsLink.objects.count(),
+            newslink_num + 1,
+            response.content.decode("utf8"),
+        )
+        newslink = NewsLink.objects.get(
+            slug=newslink_data["slug"]
+        )
+        self.assertEqual(startup.pk, newslink.startup.pk)
+        self.assertRedirects(
+            response, newslink.get_absolute_url()
+        )
+
+    def test_update_get(self):
+        """Can we view a form to update newslinks?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        response = self.get_check_200(
+            "newslink_update",
+            startup_slug=startup.slug,
+            newslink_slug=newslink.slug,
+        )
+        form = self.get_context("form")
+        self.assertIsInstance(form, NewsLinkForm)
+        context_newslink = self.get_context("newslink")
+        context_startup = self.get_context("startup")
+        self.assertEqual(newslink.pk, context_newslink.pk)
+        self.assertEqual(startup.pk, context_startup.pk)
+        self.assertContext("update", True)
+        self.assertTemplateUsed(
+            response, "newslink/form.html"
+        )
+        self.assertTemplateUsed(
+            response, "newslink/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_update_post(self):
+        """Can we submit a form to update newslinks?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        self.assertNotEqual(newslink.title, "django")
+        newslink_data = omit_keys(
+            "id", get_instance_data(newslink)
+        )
+        response = self.post(
+            "newslink_update",
+            startup_slug=startup.slug,
+            newslink_slug=newslink.slug,
+            data=dict(newslink_data, title="django"),
+        )
+        newslink.refresh_from_db()
+        self.assertEqual(
+            newslink.title,
+            "django",
+            response.content.decode("utf8"),
+        )
+        self.assertRedirects(
+            response, newslink.get_absolute_url()
+        )
+
+    def test_delete_get(self):
+        """Can we view a form to delete a NewsLink?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        response = self.get_check_200(
+            "newslink_delete",
+            startup_slug=startup.slug,
+            newslink_slug=newslink.slug,
+        )
+        context_newslink = self.get_context("newslink")
+        context_startup = self.get_context("startup")
+        self.assertEqual(newslink.pk, context_newslink.pk)
+        self.assertEqual(startup.pk, context_startup.pk)
+        self.assertTemplateUsed(
+            response, "newslink/confirm_delete.html"
+        )
+        self.assertTemplateUsed(
+            response, "newslink/base.html"
+        )
+        self.assertTemplateUsed(response, "base.html")
+
+    def test_delete_post(self):
+        """Can we submit a form to delete a NewsLink?"""
+        startup = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup)
+        response = self.post(
+            "newslink_delete",
+            startup_slug=startup.slug,
+            newslink_slug=newslink.slug,
+        )
+        self.assertRedirects(
+            response, startup.get_absolute_url()
+        )
+        self.assertFalse(
+            NewsLink.objects.filter(pk=newslink.pk).exists()
         )
