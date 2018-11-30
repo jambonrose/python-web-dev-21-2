@@ -1,0 +1,23 @@
+{% extends parent_template|default:"newslink/base.html" %}
+
+{% block title %}
+  Article for {{ startup.name }}: delete?
+{% endblock %}
+
+{% block content %}
+  <form
+      action="."
+      method="post"
+  >
+    {% csrf_token %}
+    <p>
+      Are you sure you want to delete the article
+      <a href="{{ newslink.link }}">{{ newlink.title }}</a>
+      associated with {{ startup.name }}?
+    </p>
+    <a href="{{ newslink.get_absolute_url }}">
+      Cancel
+    </a>
+    <button type="submit">Delete link to article</button>
+  </form>
+{% endblock %}
