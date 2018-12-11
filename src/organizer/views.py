@@ -21,6 +21,8 @@ from .models import NewsLink, Startup, Tag
 class NewsLinkCreate(View):
     """Create a link to an article about a startup"""
 
+    template_name = "newslink/form.html"
+
     def get(self, request, startup_slug):
         """Display form to create new NewsLinks"""
         startup = get_object_or_404(
@@ -31,8 +33,7 @@ class NewsLinkCreate(View):
             "startup": startup,
             "update": False,
         }
-        template_name = "newslink/form.html"
-        return render(request, template_name, context)
+        return render(request, self.template_name, context)
 
     def post(self, request, startup_slug):
         """Process form submission with new NewsLink data"""
@@ -48,12 +49,13 @@ class NewsLinkCreate(View):
             "startup": startup,
             "update": False,
         }
-        template_name = "newslink/form.html"
-        return render(request, template_name, context)
+        return render(request, self.template_name, context)
 
 
 class NewsLinkDelete(View):
     """Delete a link to an article about a startup"""
+
+    template_name = "newslink/confirm_delete.html"
 
     def get(self, request, startup_slug, newslink_slug):
         """Ask for confirmation of deletion"""
@@ -66,8 +68,7 @@ class NewsLinkDelete(View):
             "newslink": newslink,
             "startup": newslink.startup,
         }
-        template_name = "newslink/confirm_delete.html"
-        return render(request, template_name, context)
+        return render(request, self.template_name, context)
 
     def post(self, request, startup_slug, newslink_slug):
         """Delete specified NewsLink"""
@@ -121,6 +122,8 @@ class NewsLinkDetail(View):
 class NewsLinkUpdate(View):
     """Update a link to an article about a startup"""
 
+    template_name = "newslink/form.html"
+
     def get(self, request, startup_slug, newslink_slug):
         """Display pre-filled form to update NewsLink"""
         newslink = get_object_or_404(
@@ -134,8 +137,7 @@ class NewsLinkUpdate(View):
             "startup": newslink.startup,
             "update": True,
         }
-        template_name = "newslink/form.html"
-        return render(request, template_name, context)
+        return render(request, self.template_name, context)
 
     def post(self, request, startup_slug, newslink_slug):
         """Process form submission with NewsLink data"""
@@ -156,8 +158,7 @@ class NewsLinkUpdate(View):
             "startup": newslink.startup,
             "update": True,
         }
-        template_name = "newslink/form.html"
-        return render(request, template_name, context)
+        return render(request, self.template_name, context)
 
 
 class TagList(ListView):
