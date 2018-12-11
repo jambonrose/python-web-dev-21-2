@@ -63,15 +63,17 @@ class NewsLinkCreate(NewsLinkContextMixin, View):
     extra_context = {"update": False}
     template_name = "newslink/form.html"
 
-    def get(self, request, startup_slug):
-        """Display form to create new NewsLinks"""
+    def get_initial(self):
+        """Pre-select Startup in NewsLinkForm"""
         startup = get_object_or_404(
             Startup, slug=self.kwargs.get("startup_slug")
         )
+        return {"startup": startup.pk}
+
+    def get(self, request, startup_slug):
+        """Display form to create new NewsLinks"""
         context = self.get_context_data(
-            form=NewsLinkForm(
-                initial={"startup": startup.pk}
-            )
+            form=NewsLinkForm(initial=self.get_initial())
         )
         return render(request, self.template_name, context)
 
