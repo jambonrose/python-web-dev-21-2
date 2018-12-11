@@ -361,6 +361,18 @@ class NewsLinkViewTests(TestCase):
         )
         form = self.get_context("form")
         self.assertIsInstance(form, NewsLinkForm)
+        initial_startup_pk = form.initial.get("startup")
+        self.assertIsNotNone(
+            initial_startup_pk,
+            "An initial value for the Startup must be "
+            "provided to the NewsLinkForm",
+        )
+        self.assertEqual(
+            startup.pk,
+            initial_startup_pk,
+            f"Startup FK {startup.pk} not set in form, "
+            f"found {initial_startup_pk} in form instead",
+        )
         context_startup = self.get_context("startup")
         self.assertEqual(startup.pk, context_startup.pk)
         self.assertContext("update", False)
@@ -399,6 +411,31 @@ class NewsLinkViewTests(TestCase):
         self.assertEqual(startup.pk, newslink.startup.pk)
         self.assertRedirects(
             response, newslink.get_absolute_url()
+        )
+
+    def test_create_post_malicious_form(self):
+        """Can we maliciously change startups in NewsLink create?"""
+        newslink_num = NewsLink.objects.count()
+        startup1 = StartupFactory()
+        startup2 = StartupFactory()
+        newslink_data = {
+            **omit_keys(
+                "id",
+                get_instance_data(NewsLinkFactory.build()),
+            ),
+            "startup": startup1.pk,
+        }
+        response = self.post(
+            "newslink_create",
+            startup_slug=startup2.slug,
+            data=newslink_data,
+        )
+        self.response_400()
+        # ensure NewsLink _not_ created
+        self.assertEqual(
+            NewsLink.objects.count(),
+            newslink_num,
+            response.content.decode("utf8"),
         )
 
     def test_update_get(self):
@@ -447,6 +484,33 @@ class NewsLinkViewTests(TestCase):
         )
         self.assertRedirects(
             response, newslink.get_absolute_url()
+        )
+
+    def test_update_post_malicious_form(self):
+        """Can we maliciously change startups in NewsLink update?"""
+        startup1 = StartupFactory()
+        startup2 = StartupFactory()
+        newslink = NewsLinkFactory(startup=startup1)
+        new_title = "django"
+        self.assertNotEqual(newslink.title, new_title)
+        newslink_data = {
+            **omit_keys("id", get_instance_data(newslink)),
+            "title": new_title,
+            "startup": startup2.pk,
+        }
+        response = self.post(
+            "newslink_update",
+            startup_slug=startup1.slug,
+            newslink_slug=newslink.slug,
+            data=newslink_data,
+        )
+        self.response_400()
+        # ensure NewsLink _not_ update
+        newslink.refresh_from_db()
+        self.assertNotEqual(
+            newslink.title,
+            new_title,
+            response.content.decode("utf8"),
         )
 
     def test_delete_get(self):
