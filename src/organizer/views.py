@@ -1,18 +1,14 @@
 """Views for Organizer App"""
 from django.core.exceptions import SuspiciousOperation
-from django.shortcuts import (
-    get_object_or_404,
-    redirect,
-    render,
-)
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
     ListView,
+    RedirectView,
     UpdateView,
-    View,
 )
 
 from .forms import NewsLinkForm, StartupForm, TagForm
@@ -22,8 +18,19 @@ from .models import NewsLink, Startup, Tag
 class NewsLinkObjectMixin:
     """Django View mix-in to find NewsLinks"""
 
-    def get_object(self):
-        """Get NewsLink from database"""
+    model = NewsLink
+
+    def get_object(self, queryset=None):
+        """Get NewsLink from database
+
+        http://ccbv.co.uk/SingleObjectMixin
+        """
+        if queryset is None:
+            if hasattr(self, "get_queryset"):
+                queryset = self.get_queryset()
+            else:
+                queryset = self.model.objects.all()
+
         # Django's View class puts URI kwargs in dictionary
         startup_slug = self.kwargs.get("startup_slug")
         newslink_slug = self.kwargs.get("newslink_slug")
@@ -36,25 +43,26 @@ class NewsLinkObjectMixin:
             )
 
         return get_object_or_404(
-            NewsLink,
+            queryset,
             startup__slug=startup_slug,
             slug=newslink_slug,
         )
 
 
 class NewsLinkContextMixin:
-    """Build template context for NewsLink views"""
+    """Add Startup to template context in NewsLink views"""
 
     def get_context_data(self, **kwargs):
-        """Build context dictionary for template"""
+        """Dynamically add to template context
+
+        http://ccbv.co.uk/ContextMixin
+        """
         startup = get_object_or_404(
             Startup, slug=self.kwargs.get("startup_slug")
         )
-        context = {"startup": startup}
-        context.update(kwargs)
-        if self.extra_context is not None:
-            context.update(self.extra_context)
-        return context
+        return super().get_context_data(
+            startup=startup, **kwargs
+        )
 
 
 class VerifyStartupFkToUriMixin:
@@ -67,22 +75,37 @@ class VerifyStartupFkToUriMixin:
     the same
     """
 
-    def verify_startup_fk_matches_uri(
-        self, request, startup
-    ):
+    def verify_startup_fk_matches_uri(self):
         """Raise HTTP 400 if Startup data mismatched"""
-        if str(startup.pk) != request.POST.get("startup"):
+        startup = get_object_or_404(
+            Startup, slug=self.kwargs.get("startup_slug")
+        )
+        form_startup_pk = self.request.POST.get("startup")
+        if str(startup.pk) != form_startup_pk:
             raise SuspiciousOperation(
                 "Startup Form PK and URI do not match"
             )
 
+    def post(self, request, *args, **kwargs):
+        """Check Startup data before form submission process
+
+        - Raise HTTP 400 if Startup data mismatched
+        - Hook into Generic Views for rest of work
+        """
+        self.verify_startup_fk_matches_uri()
+        return super().post(request, *args, **kwargs)
+
 
 class NewsLinkCreate(
-    VerifyStartupFkToUriMixin, NewsLinkContextMixin, View
+    VerifyStartupFkToUriMixin,
+    NewsLinkContextMixin,
+    CreateView,
 ):
     """Create a link to an article about a startup"""
 
     extra_context = {"update": False}
+    form_class = NewsLinkForm
+    model = NewsLink
     template_name = "newslink/form.html"
 
     def get_initial(self):
@@ -90,119 +113,51 @@ class NewsLinkCreate(
         startup = get_object_or_404(
             Startup, slug=self.kwargs.get("startup_slug")
         )
-        return {"startup": startup.pk}
-
-    def get(self, request, startup_slug):
-        """Display form to create new NewsLinks"""
-        context = self.get_context_data(
-            form=NewsLinkForm(initial=self.get_initial())
+        return dict(
+            super().get_initial(), startup=startup.pk
         )
-        return render(request, self.template_name, context)
-
-    def post(self, request, startup_slug):
-        """Process form submission with new NewsLink data"""
-        startup = get_object_or_404(
-            Startup, slug=self.kwargs.get("startup_slug")
-        )
-        self.verify_startup_fk_matches_uri(request, startup)
-        newslink_form = NewsLinkForm(request.POST)
-        if newslink_form.is_valid():
-            newslink = newslink_form.save()
-            return redirect(newslink)
-        context = self.get_context_data(form=newslink_form)
-        return render(request, self.template_name, context)
 
 
 class NewsLinkDelete(
-    NewsLinkObjectMixin, NewsLinkContextMixin, View
+    NewsLinkObjectMixin, NewsLinkContextMixin, DeleteView
 ):
     """Delete a link to an article about a startup"""
 
-    extra_context = None
     template_name = "newslink/confirm_delete.html"
 
-    def get(self, request, startup_slug, newslink_slug):
-        """Ask for confirmation of deletion"""
-        newslink = self.get_object()
-        context = self.get_context_data(newslink=newslink)
-        return render(request, self.template_name, context)
+    def get_success_url(self):
+        """Return the detail page of the Startup parent
 
-    def post(self, request, startup_slug, newslink_slug):
-        """Delete specified NewsLink"""
-        newslink = self.get_object()
-        newslink.delete()
+        http://ccbv.co.uk/DeletionMixin
+        """
         startup = get_object_or_404(
-            Startup, slug=startup_slug
+            Startup, slug=self.kwargs.get("startup_slug")
         )
-        return redirect(startup)
+        return startup.get_absolute_url()
 
 
-class NewsLinkDetail(NewsLinkObjectMixin, View):
-    """Redirect /<startup>/<newslink>/ to /<startup>/"""
+class NewsLinkDetail(NewsLinkObjectMixin, RedirectView):
+    """Redirect to Startup Detail page
 
-    def get(self, request, startup_slug, newslink_slug):
+    http://ccbv.co.uk/RedirectView/
+    """
+
+    def get_redirect_url(self, *args, **kwargs):
         """Redirect user to Startup page"""
-        # We could redirect like so:
-        #
-        #     return redirect(
-        #         reverse(
-        #             "startup_detail",
-        #             kwargs={"slug": startup_slug},
-        #         )
-        #     )
-        #
-        # The advantage of the code above is that we avoid a
-        # database query.
-        #
-        # However, this means we will not show a 404 if the
-        # NewsLink slug does not exist. For correctness, we
-        # therefore check the existence of the NewsLink, and
-        # then redirect.
-        newslink = self.get_object()
-        # NewsLink.get_absolute_url returns the detail page
-        # of startup, so we could use:
-        #     return redirect(newslink)
-        #
-        # However, it may also be surprising/confusing, so
-        # we opt instead for the code below.
-        return redirect(newslink.startup)
+        return self.get_object().get_absolute_url()
 
 
 class NewsLinkUpdate(
     VerifyStartupFkToUriMixin,
     NewsLinkObjectMixin,
     NewsLinkContextMixin,
-    View,
+    UpdateView,
 ):
     """Update a link to an article about a startup"""
 
     extra_context = {"update": True}
+    form_class = NewsLinkForm
     template_name = "newslink/form.html"
-
-    def get(self, request, startup_slug, newslink_slug):
-        """Display pre-filled form to update NewsLink"""
-        newslink = self.get_object()
-        context = self.get_context_data(
-            form=NewsLinkForm(instance=newslink),
-            newslink=newslink,
-        )
-        return render(request, self.template_name, context)
-
-    def post(self, request, startup_slug, newslink_slug):
-        """Process form submission with NewsLink data"""
-        newslink = self.get_object()
-        startup = newslink.startup
-        self.verify_startup_fk_matches_uri(request, startup)
-        newslink_form = NewsLinkForm(
-            request.POST, instance=newslink
-        )
-        if newslink_form.is_valid():
-            newslink = newslink_form.save()
-            return redirect(newslink)
-        context = self.get_context_data(
-            form=newslink_form, newslink=newslink
-        )
-        return render(request, self.template_name, context)
 
 
 class TagList(ListView):
