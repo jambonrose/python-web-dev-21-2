@@ -1,6 +1,7 @@
 """Forms for the Organizer app"""
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
+from django.forms.widgets import HiddenInput
 
 from .models import NewsLink, Startup, Tag
 
@@ -57,6 +58,7 @@ class NewsLinkForm(ModelForm):
     class Meta:
         model = NewsLink
         fields = "__all__"
+        widgets = {"startup": HiddenInput()}
 
     def clean_slug(self):
         """Avoid URI conflicts with paths in app"""
