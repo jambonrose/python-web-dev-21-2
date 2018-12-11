@@ -111,6 +111,16 @@ class StartupFormTests(TestCase):
 class NewsLinkFormTests(TestCase):
     """Tests for NewsLinkForm"""
 
+    def test_startup_hidden_field(self):
+        """Ensure that the Startup field is hidden"""
+        self.assertIn(
+            "startup",
+            [
+                field.name
+                for field in NewsLinkForm().hidden_fields()
+            ],
+        )
+
     def test_creation(self):
         """Can we save new newslinks based on input?"""
         startup = StartupFactory()
