@@ -1,4 +1,5 @@
 """Views for Organizer App"""
+from django.http import HttpResponseBadRequest
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -64,11 +65,26 @@ class NewsLinkCreate(NewsLinkContextMixin, View):
 
     def get(self, request, startup_slug):
         """Display form to create new NewsLinks"""
-        context = self.get_context_data(form=NewsLinkForm())
+        startup = get_object_or_404(
+            Startup, slug=self.kwargs.get("startup_slug")
+        )
+        context = self.get_context_data(
+            form=NewsLinkForm(
+                initial={"startup": startup.pk}
+            )
+        )
         return render(request, self.template_name, context)
 
     def post(self, request, startup_slug):
         """Process form submission with new NewsLink data"""
+        startup = get_object_or_404(
+            Startup, slug=self.kwargs.get("startup_slug")
+        )
+        # Check form has not been tampered
+        if str(startup.pk) != request.POST.get("startup"):
+            return HttpResponseBadRequest(
+                "Startup Form PK and URI do not match"
+            )
         newslink_form = NewsLinkForm(request.POST)
         if newslink_form.is_valid():
             newslink = newslink_form.save()
@@ -152,6 +168,12 @@ class NewsLinkUpdate(
     def post(self, request, startup_slug, newslink_slug):
         """Process form submission with NewsLink data"""
         newslink = self.get_object()
+        startup = newslink.startup
+        # Check form has not been tampered
+        if str(startup.pk) != request.POST.get("startup"):
+            return HttpResponseBadRequest(
+                "Startup Form PK and URI do not match"
+            )
         newslink_form = NewsLinkForm(
             request.POST, instance=newslink
         )
