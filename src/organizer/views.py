@@ -18,6 +18,29 @@ from .forms import NewsLinkForm, StartupForm, TagForm
 from .models import NewsLink, Startup, Tag
 
 
+class NewsLinkObjectMixin:
+    """Django View mix-in to find NewsLinks"""
+
+    def get_object(self):
+        """Get NewsLink from database"""
+        # Django's View class puts URI kwargs in dictionary
+        startup_slug = self.kwargs.get("startup_slug")
+        newslink_slug = self.kwargs.get("newslink_slug")
+
+        if startup_slug is None or newslink_slug is None:
+            raise AttributeError(
+                f"View {self.__class__.__name__} must be"
+                f"called with a slug for a Startup and a"
+                f"slug for a NewsLink objects."
+            )
+
+        return get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+
+
 class NewsLinkCreate(View):
     """Create a link to an article about a startup"""
 
@@ -52,22 +75,10 @@ class NewsLinkCreate(View):
         return render(request, self.template_name, context)
 
 
-class NewsLinkDelete(View):
+class NewsLinkDelete(NewsLinkObjectMixin, View):
     """Delete a link to an article about a startup"""
 
     template_name = "newslink/confirm_delete.html"
-
-    def get_object(self):
-        """Get NewsLink from database"""
-        # Django's View class puts URI kwargs in dictionary
-        startup_slug = self.kwargs.get("startup_slug")
-        newslink_slug = self.kwargs.get("newslink_slug")
-
-        return get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
 
     def get(self, request, startup_slug, newslink_slug):
         """Ask for confirmation of deletion"""
@@ -88,20 +99,8 @@ class NewsLinkDelete(View):
         return redirect(startup)
 
 
-class NewsLinkDetail(View):
+class NewsLinkDetail(NewsLinkObjectMixin, View):
     """Redirect /<startup>/<newslink>/ to /<startup>/"""
-
-    def get_object(self):
-        """Get NewsLink from database"""
-        # Django's View class puts URI kwargs in dictionary
-        startup_slug = self.kwargs.get("startup_slug")
-        newslink_slug = self.kwargs.get("newslink_slug")
-
-        return get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
 
     def get(self, request, startup_slug, newslink_slug):
         """Redirect user to Startup page"""
@@ -131,22 +130,10 @@ class NewsLinkDetail(View):
         return redirect(newslink.startup)
 
 
-class NewsLinkUpdate(View):
+class NewsLinkUpdate(NewsLinkObjectMixin, View):
     """Update a link to an article about a startup"""
 
     template_name = "newslink/form.html"
-
-    def get_object(self):
-        """Get NewsLink from database"""
-        # Django's View class puts URI kwargs in dictionary
-        startup_slug = self.kwargs.get("startup_slug")
-        newslink_slug = self.kwargs.get("newslink_slug")
-
-        return get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
 
     def get(self, request, startup_slug, newslink_slug):
         """Display pre-filled form to update NewsLink"""
