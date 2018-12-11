@@ -1,4 +1,9 @@
 """Views for Organizer App"""
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -6,10 +11,153 @@ from django.views.generic import (
     DetailView,
     ListView,
     UpdateView,
+    View,
 )
 
-from .forms import StartupForm, TagForm
-from .models import Startup, Tag
+from .forms import NewsLinkForm, StartupForm, TagForm
+from .models import NewsLink, Startup, Tag
+
+
+class NewsLinkCreate(View):
+    """Create a link to an article about a startup"""
+
+    def get(self, request, startup_slug):
+        """Display form to create new NewsLinks"""
+        startup = get_object_or_404(
+            Startup, slug=startup_slug
+        )
+        context = {
+            "form": NewsLinkForm(),
+            "startup": startup,
+            "update": False,
+        }
+        template_name = "newslink/form.html"
+        return render(request, template_name, context)
+
+    def post(self, request, startup_slug):
+        """Process form submission with new NewsLink data"""
+        newslink_form = NewsLinkForm(request.POST)
+        if newslink_form.is_valid():
+            newslink = newslink_form.save()
+            return redirect(newslink)
+        startup = get_object_or_404(
+            Startup, slug=startup_slug
+        )
+        context = {
+            "form": newslink_form,
+            "startup": startup,
+            "update": False,
+        }
+        template_name = "newslink/form.html"
+        return render(request, template_name, context)
+
+
+class NewsLinkDelete(View):
+    """Delete a link to an article about a startup"""
+
+    def get(self, request, startup_slug, newslink_slug):
+        """Ask for confirmation of deletion"""
+        newslink = get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+        context = {
+            "newslink": newslink,
+            "startup": newslink.startup,
+        }
+        template_name = "newslink/confirm_delete.html"
+        return render(request, template_name, context)
+
+    def post(self, request, startup_slug, newslink_slug):
+        """Delete specified NewsLink"""
+        newslink = get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+        newslink.delete()
+        startup = get_object_or_404(
+            Startup, slug=startup_slug
+        )
+        return redirect(startup)
+
+
+class NewsLinkDetail(View):
+    """Redirect /<startup>/<newslink>/ to /<startup>/"""
+
+    def get(self, request, startup_slug, newslink_slug):
+        """Redirect user to Startup page"""
+        # We could redirect like so:
+        #
+        #     return redirect(
+        #         reverse(
+        #             "startup_detail",
+        #             kwargs={"slug": startup_slug},
+        #         )
+        #     )
+        #
+        # The advantage of the code above is that we avoid a
+        # database query.
+        #
+        # However, this means we will not show a 404 if the
+        # NewsLink slug does not exist. For correctness, we
+        # therefore check the existence of the NewsLink, and
+        # then redirect.
+        newslink = get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+        # NewsLink.get_absolute_url returns the detail page
+        # of startup, so we could use:
+        #     return redirect(newslink)
+        #
+        # However, it may also be surprising/confusing, so
+        # we opt instead for the code below.
+        return redirect(newslink.startup)
+
+
+class NewsLinkUpdate(View):
+    """Update a link to an article about a startup"""
+
+    def get(self, request, startup_slug, newslink_slug):
+        """Display pre-filled form to update NewsLink"""
+        newslink = get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+        context = {
+            "form": NewsLinkForm(instance=newslink),
+            "newslink": newslink,
+            "startup": newslink.startup,
+            "update": True,
+        }
+        template_name = "newslink/form.html"
+        return render(request, template_name, context)
+
+    def post(self, request, startup_slug, newslink_slug):
+        """Process form submission with NewsLink data"""
+        newslink = get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
+        newslink_form = NewsLinkForm(
+            request.POST, instance=newslink
+        )
+        if newslink_form.is_valid():
+            newslink = newslink_form.save()
+            return redirect(newslink)
+        context = {
+            "form": newslink_form,
+            "newslink": newslink,
+            "startup": newslink.startup,
+            "update": True,
+        }
+        template_name = "newslink/form.html"
+        return render(request, template_name, context)
 
 
 class TagList(ListView):

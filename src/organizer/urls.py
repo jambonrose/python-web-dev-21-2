@@ -2,6 +2,10 @@
 from django.urls import path
 
 from .views import (
+    NewsLinkCreate,
+    NewsLinkDelete,
+    NewsLinkDetail,
+    NewsLinkUpdate,
     StartupCreate,
     StartupDelete,
     StartupDetail,
@@ -39,6 +43,28 @@ urlpatterns = [
         "startup/<str:slug>/update/",
         StartupUpdate.as_view(),
         name="startup_update",
+    ),
+    path(
+        "startup/<str:startup_slug>/add_article/",
+        NewsLinkCreate.as_view(),
+        name="newslink_create",
+    ),
+    path(
+        "startup/<str:startup_slug>/<str:newslink_slug>/",
+        NewsLinkDetail.as_view(),
+        name="newslink_detail",
+    ),
+    path(
+        "startup/<str:startup_slug>/<str:newslink_slug>/"
+        "delete/",
+        NewsLinkDelete.as_view(),
+        name="newslink_delete",
+    ),
+    path(
+        "startup/<str:startup_slug>/<str:newslink_slug>/"
+        "update/",
+        NewsLinkUpdate.as_view(),
+        name="newslink_update",
     ),
     path("tag/", TagList.as_view(), name="tag_list"),
     path(
