@@ -57,13 +57,21 @@ class NewsLinkDelete(View):
 
     template_name = "newslink/confirm_delete.html"
 
-    def get(self, request, startup_slug, newslink_slug):
-        """Ask for confirmation of deletion"""
-        newslink = get_object_or_404(
+    def get_object(self):
+        """Get NewsLink from database"""
+        # Django's View class puts URI kwargs in dictionary
+        startup_slug = self.kwargs.get("startup_slug")
+        newslink_slug = self.kwargs.get("newslink_slug")
+
+        return get_object_or_404(
             NewsLink,
             startup__slug=startup_slug,
             slug=newslink_slug,
         )
+
+    def get(self, request, startup_slug, newslink_slug):
+        """Ask for confirmation of deletion"""
+        newslink = self.get_object()
         context = {
             "newslink": newslink,
             "startup": newslink.startup,
@@ -72,11 +80,7 @@ class NewsLinkDelete(View):
 
     def post(self, request, startup_slug, newslink_slug):
         """Delete specified NewsLink"""
-        newslink = get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
+        newslink = self.get_object()
         newslink.delete()
         startup = get_object_or_404(
             Startup, slug=startup_slug
@@ -86,6 +90,18 @@ class NewsLinkDelete(View):
 
 class NewsLinkDetail(View):
     """Redirect /<startup>/<newslink>/ to /<startup>/"""
+
+    def get_object(self):
+        """Get NewsLink from database"""
+        # Django's View class puts URI kwargs in dictionary
+        startup_slug = self.kwargs.get("startup_slug")
+        newslink_slug = self.kwargs.get("newslink_slug")
+
+        return get_object_or_404(
+            NewsLink,
+            startup__slug=startup_slug,
+            slug=newslink_slug,
+        )
 
     def get(self, request, startup_slug, newslink_slug):
         """Redirect user to Startup page"""
@@ -105,11 +121,7 @@ class NewsLinkDetail(View):
         # NewsLink slug does not exist. For correctness, we
         # therefore check the existence of the NewsLink, and
         # then redirect.
-        newslink = get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
+        newslink = self.get_object()
         # NewsLink.get_absolute_url returns the detail page
         # of startup, so we could use:
         #     return redirect(newslink)
@@ -124,13 +136,21 @@ class NewsLinkUpdate(View):
 
     template_name = "newslink/form.html"
 
-    def get(self, request, startup_slug, newslink_slug):
-        """Display pre-filled form to update NewsLink"""
-        newslink = get_object_or_404(
+    def get_object(self):
+        """Get NewsLink from database"""
+        # Django's View class puts URI kwargs in dictionary
+        startup_slug = self.kwargs.get("startup_slug")
+        newslink_slug = self.kwargs.get("newslink_slug")
+
+        return get_object_or_404(
             NewsLink,
             startup__slug=startup_slug,
             slug=newslink_slug,
         )
+
+    def get(self, request, startup_slug, newslink_slug):
+        """Display pre-filled form to update NewsLink"""
+        newslink = self.get_object()
         context = {
             "form": NewsLinkForm(instance=newslink),
             "newslink": newslink,
@@ -141,11 +161,7 @@ class NewsLinkUpdate(View):
 
     def post(self, request, startup_slug, newslink_slug):
         """Process form submission with NewsLink data"""
-        newslink = get_object_or_404(
-            NewsLink,
-            startup__slug=startup_slug,
-            slug=newslink_slug,
-        )
+        newslink = self.get_object()
         newslink_form = NewsLinkForm(
             request.POST, instance=newslink
         )
