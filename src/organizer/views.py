@@ -1,5 +1,5 @@
 """Views for Organizer App"""
-from django.http import HttpResponseBadRequest
+from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -57,7 +57,29 @@ class NewsLinkContextMixin:
         return context
 
 
-class NewsLinkCreate(NewsLinkContextMixin, View):
+class VerifyStartupFkToUriMixin:
+    """Mixin to verify Startup data in NewsLink views
+
+    NewsLink creation and updating views specify the Startup slug in the URI.
+    However, for simplicity when interacting with the NewsLinkForm, the form
+    also has a field for the Startup object. This class ensures that the
+    Startup referred to by the URI and by the NewsLinkForm field is one and
+    the same
+    """
+
+    def verify_startup_fk_matches_uri(
+        self, request, startup
+    ):
+        """Raise HTTP 400 if Startup data mismatched"""
+        if str(startup.pk) != request.POST.get("startup"):
+            raise SuspiciousOperation(
+                "Startup Form PK and URI do not match"
+            )
+
+
+class NewsLinkCreate(
+    VerifyStartupFkToUriMixin, NewsLinkContextMixin, View
+):
     """Create a link to an article about a startup"""
 
     extra_context = {"update": False}
@@ -82,11 +104,7 @@ class NewsLinkCreate(NewsLinkContextMixin, View):
         startup = get_object_or_404(
             Startup, slug=self.kwargs.get("startup_slug")
         )
-        # Check form has not been tampered
-        if str(startup.pk) != request.POST.get("startup"):
-            return HttpResponseBadRequest(
-                "Startup Form PK and URI do not match"
-            )
+        self.verify_startup_fk_matches_uri(request, startup)
         newslink_form = NewsLinkForm(request.POST)
         if newslink_form.is_valid():
             newslink = newslink_form.save()
@@ -151,7 +169,10 @@ class NewsLinkDetail(NewsLinkObjectMixin, View):
 
 
 class NewsLinkUpdate(
-    NewsLinkObjectMixin, NewsLinkContextMixin, View
+    VerifyStartupFkToUriMixin,
+    NewsLinkObjectMixin,
+    NewsLinkContextMixin,
+    View,
 ):
     """Update a link to an article about a startup"""
 
@@ -171,11 +192,7 @@ class NewsLinkUpdate(
         """Process form submission with NewsLink data"""
         newslink = self.get_object()
         startup = newslink.startup
-        # Check form has not been tampered
-        if str(startup.pk) != request.POST.get("startup"):
-            return HttpResponseBadRequest(
-                "Startup Form PK and URI do not match"
-            )
+        self.verify_startup_fk_matches_uri(request, startup)
         newslink_form = NewsLinkForm(
             request.POST, instance=newslink
         )
