@@ -41,21 +41,30 @@ class NewsLinkObjectMixin:
         )
 
 
-class NewsLinkCreate(View):
+class NewsLinkContextMixin:
+    """Build template context for NewsLink views"""
+
+    def get_context_data(self, **kwargs):
+        """Build context dictionary for template"""
+        startup = get_object_or_404(
+            Startup, slug=self.kwargs.get("startup_slug")
+        )
+        context = {"startup": startup}
+        context.update(kwargs)
+        if self.extra_context is not None:
+            context.update(self.extra_context)
+        return context
+
+
+class NewsLinkCreate(NewsLinkContextMixin, View):
     """Create a link to an article about a startup"""
 
+    extra_context = {"update": False}
     template_name = "newslink/form.html"
 
     def get(self, request, startup_slug):
         """Display form to create new NewsLinks"""
-        startup = get_object_or_404(
-            Startup, slug=startup_slug
-        )
-        context = {
-            "form": NewsLinkForm(),
-            "startup": startup,
-            "update": False,
-        }
+        context = self.get_context_data(form=NewsLinkForm())
         return render(request, self.template_name, context)
 
     def post(self, request, startup_slug):
@@ -64,29 +73,22 @@ class NewsLinkCreate(View):
         if newslink_form.is_valid():
             newslink = newslink_form.save()
             return redirect(newslink)
-        startup = get_object_or_404(
-            Startup, slug=startup_slug
-        )
-        context = {
-            "form": newslink_form,
-            "startup": startup,
-            "update": False,
-        }
+        context = self.get_context_data(form=newslink_form)
         return render(request, self.template_name, context)
 
 
-class NewsLinkDelete(NewsLinkObjectMixin, View):
+class NewsLinkDelete(
+    NewsLinkObjectMixin, NewsLinkContextMixin, View
+):
     """Delete a link to an article about a startup"""
 
+    extra_context = None
     template_name = "newslink/confirm_delete.html"
 
     def get(self, request, startup_slug, newslink_slug):
         """Ask for confirmation of deletion"""
         newslink = self.get_object()
-        context = {
-            "newslink": newslink,
-            "startup": newslink.startup,
-        }
+        context = self.get_context_data(newslink=newslink)
         return render(request, self.template_name, context)
 
     def post(self, request, startup_slug, newslink_slug):
@@ -130,20 +132,21 @@ class NewsLinkDetail(NewsLinkObjectMixin, View):
         return redirect(newslink.startup)
 
 
-class NewsLinkUpdate(NewsLinkObjectMixin, View):
+class NewsLinkUpdate(
+    NewsLinkObjectMixin, NewsLinkContextMixin, View
+):
     """Update a link to an article about a startup"""
 
+    extra_context = {"update": True}
     template_name = "newslink/form.html"
 
     def get(self, request, startup_slug, newslink_slug):
         """Display pre-filled form to update NewsLink"""
         newslink = self.get_object()
-        context = {
-            "form": NewsLinkForm(instance=newslink),
-            "newslink": newslink,
-            "startup": newslink.startup,
-            "update": True,
-        }
+        context = self.get_context_data(
+            form=NewsLinkForm(instance=newslink),
+            newslink=newslink,
+        )
         return render(request, self.template_name, context)
 
     def post(self, request, startup_slug, newslink_slug):
@@ -155,12 +158,9 @@ class NewsLinkUpdate(NewsLinkObjectMixin, View):
         if newslink_form.is_valid():
             newslink = newslink_form.save()
             return redirect(newslink)
-        context = {
-            "form": newslink_form,
-            "newslink": newslink,
-            "startup": newslink.startup,
-            "update": True,
-        }
+        context = self.get_context_data(
+            form=newslink_form, newslink=newslink
+        )
         return render(request, self.template_name, context)
 
 
