@@ -6,6 +6,7 @@
 
 {% block content %}
   <h2>Startup List</h2>
+  <p><a href="{% url 'startup_create' %}">Add Startup</a></p>
   <ul>
     {% for startup in startup_list %}
       <li>

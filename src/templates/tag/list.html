@@ -6,6 +6,7 @@
 
 {% block content %}
   <h2>Tag List</h2>
+  <p><a href="{% url 'tag_create' %}">Add New Tag</a><p>
   <ul>
     {% for tag in tag_list %}
       <li>

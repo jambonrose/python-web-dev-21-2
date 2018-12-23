@@ -6,6 +6,20 @@
 
 {% block content %}
   <h2>{{ startup.name }}</h2>
+  <ul>
+    <li>
+      {# Wouldn't a model method be nicer than the call below? #}
+      <a href="{% url 'startup_update' startup.slug %}">
+        Update
+      </a>
+    </li>
+    <li>
+      {# Wouldn't a model method be nicer than the call below? #}
+      <a href="{% url 'startup_delete' startup.slug %}">
+        Delete
+      </a>
+    </li>
+  </ul>
   <dl>
     <dt>Date Founded</dt>
       <dd>{{ startup.founded_date|date:"F jS, Y" }}</dd>
@@ -25,11 +39,20 @@
   </dl>
   {{ startup.description|linebreaks }}
   <section>
+    {# Wouldn't a model method be nicer than the call below? #}
+    <p><a href="{% url 'newslink_create' startup.slug %}">
+      Add link to article
+    </a></p>
     <ul>
       {% for newslink in startup.newslink_set.all %}
         <li>
           <a href="{{ newslink.link }}">
             {{ newslink.title|title }}</a>
+          {# Wouldn't model methods be nicer than the calls below? #}
+          <a href="{% url 'newslink_update' startup.slug newslink.slug %}">
+            [Modify Link]</a>
+          <a href="{% url 'newslink_delete' startup.slug newslink.slug %}">
+            [Delete Link]</a>
         </li>
       {% endfor %}
     </ul>
