@@ -8,14 +8,12 @@
   <h2>{{ startup.name }}</h2>
   <ul>
     <li>
-      {# Wouldn't a model method be nicer than the call below? #}
-      <a href="{% url 'startup_update' startup.slug %}">
+      <a href="{{ startup.get_update_url }}">
         Update
       </a>
     </li>
     <li>
-      {# Wouldn't a model method be nicer than the call below? #}
-      <a href="{% url 'startup_delete' startup.slug %}">
+      <a href="{{ startup.get_delete_url }}">
         Delete
       </a>
     </li>
@@ -39,8 +37,7 @@
   </dl>
   {{ startup.description|linebreaks }}
   <section>
-    {# Wouldn't a model method be nicer than the call below? #}
-    <p><a href="{% url 'newslink_create' startup.slug %}">
+    <p><a href="{{ startup.get_newslink_create_url }}">
       Add link to article
     </a></p>
     <ul>
@@ -48,10 +45,9 @@
         <li>
           <a href="{{ newslink.link }}">
             {{ newslink.title|title }}</a>
-          {# Wouldn't model methods be nicer than the calls below? #}
-          <a href="{% url 'newslink_update' startup.slug newslink.slug %}">
+          <a href="{{ newslink.get_update_url }}">
             [Modify Link]</a>
-          <a href="{% url 'newslink_delete' startup.slug newslink.slug %}">
+          <a href="{{ newslink.get_delete_url }}">
             [Delete Link]</a>
         </li>
       {% endfor %}

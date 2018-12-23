@@ -57,6 +57,18 @@ class Tag(Model):
             "tag_detail", kwargs={"slug": self.slug}
         )
 
+    def get_update_url(self):
+        """Return URL to update page of Tag"""
+        return reverse(
+            "tag_update", kwargs={"slug": self.slug}
+        )
+
+    def get_delete_url(self):
+        """Return URL to delete page of Tag"""
+        return reverse(
+            "tag_delete", kwargs={"slug": self.slug}
+        )
+
 
 class Startup(Model):
     """Data about a Startup company"""
@@ -88,6 +100,25 @@ class Startup(Model):
             "startup_detail", kwargs={"slug": self.slug}
         )
 
+    def get_update_url(self):
+        """Return URL to update page of Startup"""
+        return reverse(
+            "startup_update", kwargs={"slug": self.slug}
+        )
+
+    def get_delete_url(self):
+        """Return URL to delete page of Startup"""
+        return reverse(
+            "startup_delete", kwargs={"slug": self.slug}
+        )
+
+    def get_newslink_create_url(self):
+        """Return URL to detail page of Startup"""
+        return reverse(
+            "newslink_create",
+            kwargs={"startup_slug": self.slug},
+        )
+
 
 class NewsLink(Model):
     """Link to external sources about a Startup"""
@@ -114,4 +145,24 @@ class NewsLink(Model):
         return reverse(
             "startup_detail",
             kwargs={"slug": self.startup.slug},
+        )
+
+    def get_update_url(self):
+        """Return URL to update page of Startup"""
+        return reverse(
+            "newslink_update",
+            kwargs={
+                "startup_slug": self.startup.slug,
+                "newslink_slug": self.slug,
+            },
+        )
+
+    def get_delete_url(self):
+        """Return URL to delete page of Startup"""
+        return reverse(
+            "newslink_delete",
+            kwargs={
+                "startup_slug": self.startup.slug,
+                "newslink_slug": self.slug,
+            },
         )

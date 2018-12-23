@@ -18,14 +18,12 @@
     {{ post.text|linebreaks }}
     <ul>
       <li>
-        {# Wouldn't a model method be nicer than the call below? #}
-        <a href="{% url 'post_update' post.pub_date.year post.pub_date.month post.slug %}">
+        <a href="{{ post.get_update_url }}">
           Update
         </a>
       </li>
       <li>
-        {# Wouldn't a model method be nicer than the call below? #}
-        <a href="{% url 'post_delete' post.pub_date.year post.pub_date.month post.slug %}">
+        <a href="{{ post.get_delete_url }}">
           Delete
         </a>
       </li>
