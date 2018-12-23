@@ -1,4 +1,5 @@
 """Views for Blog App"""
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -43,7 +44,7 @@ class PostObjectMixin:
         )
 
 
-class PostCreate(CreateView):
+class PostCreate(LoginRequiredMixin, CreateView):
     """Create new blog posts"""
 
     form_class = PostForm
@@ -58,7 +59,9 @@ class PostDetail(PostObjectMixin, DetailView):
     template_name = "post/detail.html"
 
 
-class PostDelete(PostObjectMixin, DeleteView):
+class PostDelete(
+    PostObjectMixin, LoginRequiredMixin, DeleteView
+):
     """Delete a single blog post"""
 
     template_name = "post/confirm_delete.html"
@@ -72,7 +75,9 @@ class PostList(ListView):
     template_name = "post/list.html"
 
 
-class PostUpdate(PostObjectMixin, UpdateView):
+class PostUpdate(
+    PostObjectMixin, LoginRequiredMixin, UpdateView
+):
     """Update existing blog posts"""
 
     form_class = PostForm

@@ -1,4 +1,5 @@
 """Views for Organizer App"""
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -22,6 +23,7 @@ from .view_mixins import (
 class NewsLinkCreate(
     VerifyStartupFkToUriMixin,
     NewsLinkContextMixin,
+    LoginRequiredMixin,
     CreateView,
 ):
     """Create a link to an article about a startup"""
@@ -42,7 +44,10 @@ class NewsLinkCreate(
 
 
 class NewsLinkDelete(
-    NewsLinkObjectMixin, NewsLinkContextMixin, DeleteView
+    NewsLinkObjectMixin,
+    NewsLinkContextMixin,
+    LoginRequiredMixin,
+    DeleteView,
 ):
     """Delete a link to an article about a startup"""
 
@@ -74,6 +79,7 @@ class NewsLinkUpdate(
     VerifyStartupFkToUriMixin,
     NewsLinkObjectMixin,
     NewsLinkContextMixin,
+    LoginRequiredMixin,
     UpdateView,
 ):
     """Update a link to an article about a startup"""
@@ -97,7 +103,7 @@ class TagDetail(DetailView):
     template_name = "tag/detail.html"
 
 
-class TagCreate(CreateView):
+class TagCreate(LoginRequiredMixin, CreateView):
     """Create new Tags via HTML form"""
 
     form_class = TagForm
@@ -106,7 +112,7 @@ class TagCreate(CreateView):
     extra_context = {"update": False}
 
 
-class TagUpdate(UpdateView):
+class TagUpdate(LoginRequiredMixin, UpdateView):
     """Update a Tag via HTML form"""
 
     form_class = TagForm
@@ -115,7 +121,7 @@ class TagUpdate(UpdateView):
     extra_context = {"update": True}
 
 
-class TagDelete(DeleteView):
+class TagDelete(LoginRequiredMixin, DeleteView):
     """Confirm and delete a Tag via HTML Form"""
 
     model = Tag
@@ -123,7 +129,7 @@ class TagDelete(DeleteView):
     success_url = reverse_lazy("tag_list")
 
 
-class StartupCreate(CreateView):
+class StartupCreate(LoginRequiredMixin, CreateView):
     """Create new Startups via HTML form"""
 
     form_class = StartupForm
@@ -132,7 +138,7 @@ class StartupCreate(CreateView):
     extra_context = {"update": False}
 
 
-class StartupDelete(DeleteView):
+class StartupDelete(LoginRequiredMixin, DeleteView):
     """Confirm and delete a Startup via HTML Form"""
 
     model = Startup
@@ -154,7 +160,7 @@ class StartupDetail(DetailView):
     template_name = "startup/detail.html"
 
 
-class StartupUpdate(UpdateView):
+class StartupUpdate(LoginRequiredMixin, UpdateView):
     """Update a Startup via HTML form"""
 
     form_class = StartupForm
