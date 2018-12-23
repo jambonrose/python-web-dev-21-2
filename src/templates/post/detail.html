@@ -16,6 +16,20 @@
       </p>
     </header>
     {{ post.text|linebreaks }}
+    <ul>
+      <li>
+        {# Wouldn't a model method be nicer than the call below? #}
+        <a href="{% url 'post_update' post.pub_date.year post.pub_date.month post.slug %}">
+          Update
+        </a>
+      </li>
+      <li>
+        {# Wouldn't a model method be nicer than the call below? #}
+        <a href="{% url 'post_delete' post.pub_date.year post.pub_date.month post.slug %}">
+          Delete
+        </a>
+      </li>
+    </ul>
     {% if post.startups.all or post.tags.all %}
       <footer>
         {% with startup_list=post.startups.all %}
