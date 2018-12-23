@@ -8,14 +8,12 @@
   <h2>{{ tag.name|title }}</h2>
   <ul>
     <li>
-      {# Wouldn't a model method be nicer than the call below? #}
-      <a href="{% url 'tag_update' tag.slug %}">
+      <a href="{{ tag.get_update_url }}">
         Update
       </a>
     </li>
     <li>
-      {# Wouldn't a model method be nicer than the call below? #}
-      <a href="{% url 'tag_delete' tag.slug %}">
+      <a href="{{ tag.get_delete_url }}">
         Delete
       </a>
     </li>

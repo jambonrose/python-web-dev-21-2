@@ -65,3 +65,25 @@ class Post(Model):
                 "slug": self.slug,
             },
         )
+
+    def get_update_url(self):
+        """Return URL to update page of Post"""
+        return reverse(
+            "post_update",
+            kwargs={
+                "year": self.pub_date.year,
+                "month": self.pub_date.month,
+                "slug": self.slug,
+            },
+        )
+
+    def get_delete_url(self):
+        """Return URL to delete page of Post"""
+        return reverse(
+            "post_delete",
+            kwargs={
+                "year": self.pub_date.year,
+                "month": self.pub_date.month,
+                "slug": self.slug,
+            },
+        )
